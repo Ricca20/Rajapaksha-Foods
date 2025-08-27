@@ -1,9 +1,13 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React from "react";
+import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { CheckCircle, MapPin, ShoppingBag, Clock, CreditCard } from "lucide-react";
+import Navbar from "../components/Navbar";
 
 const CheckoutPage = () => {
   const location = useLocation();
-  const { menuItems, selectedPrice, selectedPortion, selectedAddOn } = location.state || {};
+  const { menuItems, selectedPrice, selectedPortion, selectedAddOn } =
+    location.state || {};
 
   // Hardcoded delivery address for now
   const deliveryAddress = {
@@ -11,40 +15,154 @@ const CheckoutPage = () => {
     street: "123 Main Street",
     city: "Colombo",
     postal: "10000",
-    phone: "+94 77 123 4567"
+    phone: "+94 77 123 4567",
   };
 
   return (
-  <div className="max-w-xl mx-auto mt-20 p-4 border border-gray-200 rounded-xl bg-gradient-to-br from-white via-blue-50 to-blue-100 shadow-md">
-  <h1 className="text-2xl font-bold text-center mb-4 text-blue-700">Place Your Order</h1>
-      {/* Order Details Section */}
-      <div className="mb-4 pb-4 border-b border-gray-300">
-        <h2 className="text-lg font-semibold mb-2 text-blue-600">Order Details</h2>
-        <ul className="mb-2">
-          {menuItems && menuItems.map((item, idx) => (
-            <li key={idx} className="mb-1 text-base font-medium text-gray-800">{item}</li>
-          ))}
-        </ul>
-        <div className="mb-1">Selected Portion: <span className="font-semibold text-blue-600">{selectedPortion}</span></div>
-        <div className="mb-1">Price: <span className="font-semibold text-blue-600">Rs. {selectedPrice}.00</span></div>
-        <div className="mb-1">Add-On: <span className="font-semibold text-blue-600">{selectedAddOn || 'None'}</span></div>
-      </div>
-      {/* Delivery Address Section */}
-      <div className="pt-4">
-        <h2 className="text-lg font-semibold mb-2 text-blue-600">Delivery Address</h2>
-        <div className="bg-white rounded shadow p-3">
-          <div className="mb-1"><span className="font-semibold">Name:</span> {deliveryAddress.name}</div>
-          <div className="mb-1"><span className="font-semibold">Street:</span> {deliveryAddress.street}</div>
-          <div className="mb-1"><span className="font-semibold">City:</span> {deliveryAddress.city}</div>
-          <div className="mb-1"><span className="font-semibold">Postal Code:</span> {deliveryAddress.postal}</div>
-          <div className="mb-1"><span className="font-semibold">Phone:</span> {deliveryAddress.phone}</div>
-        </div>
-      </div>
-      <div className="mt-4 text-center">
-        <button className="px-4 py-2 text-base bg-blue-600 text-white rounded-lg shadow hover:scale-105 hover:bg-blue-700 transition-all duration-200 font-bold">Confirm Order</button>
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main Container */}
+      <section className="pt-28 pb-16 px-6 max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
+        {/* Left Column (Order + Address) */}
+        <motion.div
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="lg:col-span-2 space-y-8"
+        >
+          {/* Order Details */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ShoppingBag className="text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
+            </div>
+            <ul className="space-y-2 mb-4">
+              {menuItems &&
+                menuItems.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="p-3 bg-gray-100 rounded-lg text-gray-900 font-medium shadow-sm"
+                  >
+                    {item}
+                  </li>
+                ))}
+            </ul>
+            <div className="space-y-1 text-gray-800">
+              <div>
+                Portion:{" "}
+                <span className="font-semibold text-orange-500">
+                  {selectedPortion}
+                </span>
+              </div>
+              <div>
+                Price:{" "}
+                <span className="font-semibold text-orange-500">
+                  Rs. {selectedPrice}.00
+                </span>
+              </div>
+              <div>
+                Add-On:{" "}
+                <span className="font-semibold text-orange-500">
+                  {selectedAddOn || "None"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery Address */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900">
+                Delivery Address
+              </h2>
+            </div>
+            <div className="bg-gray-100 rounded-xl p-5 shadow-inner space-y-2 text-gray-800">
+              <div>
+                <span className="font-semibold">Name:</span>{" "}
+                {deliveryAddress.name}
+              </div>
+              <div>
+                <span className="font-semibold">Street:</span>{" "}
+                {deliveryAddress.street}
+              </div>
+              <div>
+                <span className="font-semibold">City:</span>{" "}
+                {deliveryAddress.city}
+              </div>
+              <div>
+                <span className="font-semibold">Postal Code:</span>{" "}
+                {deliveryAddress.postal}
+              </div>
+              <div>
+                <span className="font-semibold">Phone:</span>{" "}
+                {deliveryAddress.phone}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Right Column (Summary) */}
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-6"
+        >
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Order Summary
+            </h2>
+            <div className="flex justify-between text-gray-700 mb-2">
+              <span>Subtotal</span>
+              <span>Rs. {selectedPrice}.00</span>
+            </div>
+            <div className="flex justify-between text-gray-700 mb-2">
+              <span>Delivery Fee</span>
+              <span>Rs. 150.00</span>
+            </div>
+            <div className="border-t border-gray-300 my-3"></div>
+            <div className="flex justify-between text-lg font-bold text-gray-900">
+              <span>Total</span>
+              <span className="text-orange-500">
+                Rs. {parseInt(selectedPrice || 0) + 150}.00
+              </span>
+            </div>
+          </div>
+
+          {/* Delivery Time */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 flex items-center gap-3">
+            <Clock className="text-orange-500" />
+            <div>
+              <h3 className="font-semibold text-gray-900">Estimated Delivery</h3>
+              <p className="text-gray-600">30 - 40 mins</p>
+            </div>
+          </div>
+
+          {/* Payment */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard className="text-orange-500" />
+              <h3 className="font-semibold text-gray-900">Payment Method</h3>
+            </div>
+            <p className="text-gray-700">Cash on Delivery</p>
+          </div>
+
+          {/* Confirm Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-full py-4 bg-orange-500 text-white rounded-full font-semibold text-lg shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2"
+          >
+            <CheckCircle className="w-5 h-5" />
+            Confirm Order
+          </motion.button>
+        </motion.div>
+      </section>
     </div>
   );
-}
+};
 
 export default CheckoutPage;
