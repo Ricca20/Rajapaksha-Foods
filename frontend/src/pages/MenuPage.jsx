@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Navbar from "../components/Navbar"
 
 const MenuPage = () => {
   const [menu, setMenu] = useState(null);
@@ -16,7 +18,6 @@ const MenuPage = () => {
       .then((res) => {
         setMenu(res.data.data);
         setLoading(false);
-        console.log(res.data.data);
       })
       .catch((err) => {
         setError(err.message);
@@ -24,116 +25,131 @@ const MenuPage = () => {
       });
   }, []);
 
+  if (loading) return <div className="text-center py-24 text-gray-600">Loading menu...</div>;
+  if (error) return <div className="text-center py-24 text-red-500">Error: {error}</div>;
+  if (!menu) return <div className="text-center py-24 text-gray-600">No menu found.</div>;
 
-  if (loading) return <div>Loading menu...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!menu) return <div>No menu found.</div>;
+  const addOnNames = [
+    { key: 'isChicken', label: 'Chicken' },
+    { key: 'isEgg', label: 'Egg' },
+    { key: 'isFish', label: 'Fish' },
+    { key: 'isSausage', label: 'Sausage' }
+  ];
 
+  const enabledAddOns = menu.addOns
+    ? addOnNames.filter(a => menu.addOns[a.key])
+    : [];
 
   return (
+    <section className="relative py-24 px-6 bg-gray-100 min-h-screen">
+      <Navbar/>
+      <motion.div 
+        className="max-w-3xl mx-auto p-8 bg-white rounded-3xl shadow-2xl"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-8">
+          Today's Menu
+        </h1>
 
-    <div className="max-w-xl mx-auto mt-18 p-6 border border-gray-200 rounded-lg bg-white shadow-xl justify-center">
-      <h1 className="text-3xl font-bold text-center mb-6">Today's Menu</h1>
-      <ul className="mb-6">
-        {menu.menuItems && menu.menuItems.map((item, idx) => (
-          <li key={idx} className="mb-4 pb-2 border-b border-gray-300 text-lg font-medium text-center">
-            {item}
-          </li>
-        ))}
-      </ul>
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Choose your portion</h3>
-        <form className="mb-2 flex gap-6">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="price"
-              value="full"
-              checked={selectedPrice === 'full'}
-              onChange={() => setSelectedPrice('full')}
-              className="accent-blue-600"
-            />
-            <span>Full (Rs. {menu.priceFull}.00)</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="price"
-              value="half"
-              checked={selectedPrice === 'half'}
-              onChange={() => setSelectedPrice('half')}
-              className="accent-blue-600"
-            />
-            <span>Normal (Rs. {menu.priceHalf}.00)</span>
-          </label>
-        </form>
-        {selectedPrice && (
-          <div className="text-blue-600 font-semibold mt-4">
-            Selected Portion: <span>{selectedPrice === 'full' ? "Full" : "Normal"}</span>
-          </div>
-        )}
-      </div>
-      {menu.addOns && (() => {
-        const addOnNames = [
-          { key: 'isChicken', label: 'Chicken' },
-          { key: 'isEgg', label: 'Egg' },
-          { key: 'isFish', label: 'Fish' },
-          { key: 'isSausage', label: 'Sausage' }
-        ];
-        const enabledAddOns = addOnNames.filter(a => menu.addOns[a.key]);
-        if (enabledAddOns.length === 0) return null;
-        return (
-          <div className="mt-6">
-            <h3 className="text-xl font-semibold mb-2">Add Ons</h3>
-            <form className="flex flex-col gap-2">
+        {/* Menu Items */}
+        <ul className="space-y-4 mb-8">
+          {menu.menuItems && menu.menuItems.map((item, idx) => (
+            <motion.li 
+              key={idx}
+              className="p-4 bg-gray-100 rounded-xl text-gray-900 font-semibold text-center hover:bg-orange-50 transition"
+              whileHover={{ scale: 1.03 }}
+            >
+              {item}
+            </motion.li>
+          ))}
+        </ul>
+
+        {/* Portion Selection */}
+        <div className="mb-6">
+          <h3 className="text-2xl font-semibold mb-4 text-gray-900">Choose your portion</h3>
+          <form className="flex gap-6 justify-center">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="price"
+                value="full"
+                checked={selectedPrice === 'full'}
+                onChange={() => setSelectedPrice('full')}
+                className="accent-orange-500"
+              />
+              <span className="text-gray-900 font-medium">Full (Rs. {menu.priceFull}.00)</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="price"
+                value="half"
+                checked={selectedPrice === 'half'}
+                onChange={() => setSelectedPrice('half')}
+                className="accent-orange-500"
+              />
+              <span className="text-gray-900 font-medium">Normal (Rs. {menu.priceHalf}.00)</span>
+            </label>
+          </form>
+          {selectedPrice && (
+            <div className="text-orange-500 font-semibold mt-4 text-center">
+              Selected Portion: <span>{selectedPrice === 'full' ? "Full" : "Normal"}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Add-Ons */}
+        {enabledAddOns.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-2xl font-semibold mb-4 text-gray-900">Add Ons</h3>
+            <form className="flex flex-wrap gap-4 justify-center">
               {enabledAddOns.map((addOn, idx) => (
-                <label key={idx} className="flex items-center gap-2">
+                <label key={idx} className="flex items-center gap-2 cursor-pointer bg-gray-100 rounded-xl px-4 py-2 hover:bg-orange-50 transition">
                   <input
                     type="radio"
                     name="addOn"
                     value={addOn.key}
                     checked={selectedAddOn === addOn.key}
                     onChange={() => setSelectedAddOn(addOn.key)}
-                    className="accent-blue-600"
+                    className="accent-orange-500"
                   />
-                  <span>{addOn.label}</span>
+                  <span className="text-gray-900 font-medium">{addOn.label}</span>
                 </label>
               ))}
             </form>
             {selectedAddOn && (
-              <div className="mt-2 text-blue-600 font-semibold">
+              <div className="mt-4 text-orange-500 font-semibold text-center">
                 Selected Add-On: <span>{enabledAddOns.find(a => a.key === selectedAddOn)?.label}</span>
               </div>
             )}
           </div>
-        );
-      })()}
-      <div className="mt-8 text-center">
-        <button
-          className="px-4 py-2 text-lg bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          onClick={() => {
-            const addOnNames = [
-              { key: 'isChicken', label: 'Chicken' },
-              { key: 'isEgg', label: 'Egg' },
-              { key: 'isFish', label: 'Fish' },
-              { key: 'isSausage', label: 'Sausage' }
-            ];
-            const selectedAddOnLabel = addOnNames.find(a => a.key === selectedAddOn)?.label || null;
-            navigate('/checkout', {
-              state: {
-                menuItems: menu.menuItems,
-                selectedPrice: selectedPrice === 'full' ? menu.priceFull : menu.priceHalf,
-                selectedPortion: selectedPrice === 'full' ? 'Full' : 'Normal',
-                selectedAddOn: selectedAddOnLabel
-              }
-            });
-          }}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-    
+        )}
+
+        {/* Next Button */}
+        <div className="mt-8 text-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 text-lg font-semibold bg-orange-500 text-white rounded-full shadow-lg hover:shadow-xl transition"
+            onClick={() => {
+              const selectedAddOnLabel = addOnNames.find(a => a.key === selectedAddOn)?.label || null;
+              navigate('/checkout', {
+                state: {
+                  menuItems: menu.menuItems,
+                  selectedPrice: selectedPrice === 'full' ? menu.priceFull : menu.priceHalf,
+                  selectedPortion: selectedPrice === 'full' ? 'Full' : 'Normal',
+                  selectedAddOn: selectedAddOnLabel
+                }
+              });
+            }}
+          >
+            Next
+          </motion.button>
+        </div>
+      </motion.div>
+    </section>
   );
 };
 

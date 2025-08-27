@@ -4,31 +4,11 @@ import { useState, useEffect } from "react";
 
 // Example reviews (replace with dynamic data if needed)
 const reviews = [
-  {
-    name: "Dilsara Kumarasinghe",
-    rating: 3,
-    comment: "Ko meke chicken nane"
-  },
-  {
-    name: "Pasan thedasra",
-    rating: 2,
-    comment: "uncle dan nm aula,kama set wenne na"
-  },
-  {
-    name: "Bobi Vimukthi",
-    rating: 1,
-    comment: "Luck eka thama hodama"
-  },
-  {
-    name: "Ricky perera",
-    rating: 5,
-    comment: "Uncle mage ekah bn.Adarei!!!"
-  },
-  {
-    name: "Nethal fernando",
-    rating: 3,
-    comment: "Ko uncle meke cutlets "
-  },
+  { name: "Dilsara Kumarasinghe", rating: 3, comment: "Ko meke chicken nane" },
+  { name: "Pasan thedasra", rating: 2, comment: "uncle dan nm aula,kama set wenne na" },
+  { name: "Bobi Vimukthi", rating: 1, comment: "Luck eka thama hodama" },
+  { name: "Ricky perera", rating: 5, comment: "Uncle mage ekah bn.Adarei!!!" },
+  { name: "Nethal fernando", rating: 3, comment: "Ko uncle meke cutlets " },
 ];
 
 export default function CustomerReviews() {
@@ -42,19 +22,46 @@ export default function CustomerReviews() {
     return () => clearInterval(interval);
   }, []);
 
-  const nextReview = () => {
-    setCurrentIndex((prev) => (prev + 1) % reviews.length);
+  const nextReview = () => setCurrentIndex((prev) => (prev + 1) % reviews.length);
+  const prevReview = () => setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+
+  // Background animation variants
+  const gradientBackgroundVariants = {
+    animate: {
+      backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+      transition: { duration: 15, repeat: Infinity, ease: "linear" },
+    },
   };
 
-  const prevReview = () => {
-    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+  const blobVariants = {
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [0.15, 0.25, 0.15],
+      transition: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+    },
   };
 
   return (
-    <section className="relative py-24 px-6 bg-gradient-to-r from-orange-50 via-white to-pink-50 overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
-      <div className="absolute bottom-20 -right-32 w-96 h-96 bg-pink-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+    <section className="relative py-24 px-6 overflow-hidden">
+      {/* Animated gradient background */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-gray-100 bg-[length:200%_200%]"
+        variants={gradientBackgroundVariants}
+        animate="animate"
+      />
+
+      {/* Floating background blobs */}
+      <motion.div
+        className="absolute -top-40 -left-40 w-[28rem] h-[28rem] bg-orange-300 rounded-full blur-3xl opacity-20"
+        variants={blobVariants}
+        animate="animate"
+      />
+      <motion.div
+        className="absolute -bottom-40 -right-40 w-[28rem] h-[28rem] bg-gray-300 rounded-full blur-3xl opacity-20"
+        variants={blobVariants}
+        animate="animate"
+        transition={{ delay: 2 }}
+      />
 
       <div className="relative max-w-7xl mx-auto z-10 text-center">
         <motion.div
@@ -65,7 +72,7 @@ export default function CustomerReviews() {
           className="mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-            What Our <span className="text-orange-500">Customers Say</span>
+            What Our <span className="text-orange-500">Customers</span> Say
           </h2>
           <p className="text-gray-700 mt-4 text-lg max-w-2xl mx-auto">
             Real feedback from students, families, and local customers around Malabe area.
@@ -97,9 +104,7 @@ export default function CustomerReviews() {
                   <Star
                     key={i}
                     className={`w-6 h-6 ${
-                      i < reviews[currentIndex].rating
-                        ? "text-yellow-400"
-                        : "text-gray-300"
+                      i < reviews[currentIndex].rating ? "text-yellow-400" : "text-gray-300"
                     }`}
                   />
                 ))}
