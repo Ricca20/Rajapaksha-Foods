@@ -41,7 +41,9 @@ export const createMenu = async (req, res) => {
     });
   }
 };
+//get
 
+// Get menu
 export const getMenu = async (req, res) => {
   try {
     const menu = await Menu.findOne();
