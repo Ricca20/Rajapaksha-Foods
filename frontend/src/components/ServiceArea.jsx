@@ -16,66 +16,125 @@ L.Icon.Default.mergeOptions({
 export default function ServiceArea() {
   const malabeCoords = [6.906, 79.956]; // Malabe, Colombo coordinates
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2, delayChildren: 0.3 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const titleVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+  };
+
+  const gradientBackgroundVariants = {
+    animate: {
+      backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+      transition: { duration: 15, repeat: Infinity, ease: "linear" },
+    },
+  };
+
+  const blobVariants = {
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [0.15, 0.25, 0.15],
+      transition: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+    },
+  };
+
   return (
-    <section className="relative w-full py-24 bg-gradient-to-r from-orange-50 via-white to-yellow-50 overflow-hidden">
-      {/* Decorative floating shapes */}
+    <section className="relative overflow-hidden py-24 px-6">
+      {/* Animated background gradients & blobs */}
       <motion.div
-        className="absolute -top-16 -left-16 w-32 h-32 bg-orange-200 rounded-full blur-3xl opacity-30"
-        animate={{ y: [0, 15, 0] }}
-        transition={{ repeat: Infinity, duration: 6 }}
-      />
-      <motion.div
-        className="absolute -bottom-16 -right-16 w-32 h-32 bg-yellow-200 rounded-full blur-3xl opacity-30"
-        animate={{ y: [0, -15, 0] }}
-        transition={{ repeat: Infinity, duration: 5 }}
+        className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-gray-100 bg-[length:200%_200%]"
+        variants={gradientBackgroundVariants}
+        animate="animate"
       />
 
-      <div className="relative max-w-7xl mx-auto px-6 z-10">
+      <motion.div
+        className="absolute -top-40 -left-40 w-[28rem] h-[28rem] bg-orange-300 rounded-full blur-3xl opacity-20"
+        variants={blobVariants}
+        animate="animate"
+      />
+
+      <motion.div
+        className="absolute -bottom-40 -right-40 w-[28rem] h-[28rem] bg-gray-300 rounded-full blur-3xl opacity-20"
+        variants={blobVariants}
+        animate="animate"
+        transition={{ delay: 2 }}
+      />
+
+      <div className="relative max-w-7xl mx-auto z-10">
         {/* Heading */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-            Serving <span className="text-orange-500">Malabe Area, Colombo</span>
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Serving around{" "}
+            <span className="text-orange-500">Malabe</span>{" "}
+            <span className="text-gray-900">area</span>
           </h2>
-          <p className="text-gray-700 mt-4 text-lg max-w-3xl mx-auto">
-            Delivering fresh and delicious meals within a 5 km radius around Malabe, tailored for campus students, local workers, families, and residents in apartments or dorms.
-          </p>
+          <motion.p 
+            variants={itemVariants}
+            className="text-gray-600 mt-4 text-lg max-w-3xl mx-auto"
+          >
+            We proudly deliver within <span className="font-semibold text-gray-900">5 km radius </span> 
+            of Malabe. Perfect for campus students, local workers, apartment & dorm residents, 
+            and families who love fresh, home-style Sri Lankan meals.
+          </motion.p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <motion.div
+          className="grid md:grid-cols-2 gap-12 items-center"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {/* Left: Info cards */}
           <div className="space-y-6">
             {[
               {
                 icon: MapPin,
                 title: "Location Focused",
-                desc: "Operating from Malabe, ensuring quick delivery to nearby areas.",
+                desc: "Operating from Malabe for quick & reliable delivery.",
                 color: "text-orange-500",
               },
               {
                 icon: Clock,
                 title: "Fast Delivery",
-                desc: "Food delivered within 5 km radius around Malabe area.",
+                desc: "Fresh meals at your doorstep within 30-45 minutes.",
                 color: "text-green-500",
               },
               {
                 icon: Users,
-                title: "Target Audience",
-                desc: "Campus students, local workers, families, and residents.",
+                title: "Who We Serve",
+                desc: "Campus students (SLIIT, CINEC, Horizon), workers, families, and residents.",
                 color: "text-blue-500",
+              },
+              {
+                icon: Home,
+                title: "Community Driven",
+                desc: "Supporting locals with affordable, nutritious, home-style food.",
+                color: "text-purple-500",
               },
             ].map((item, index) => (
               <motion.div
                 key={index}
-                initial={{ x: -50, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.7, delay: index * 0.1 }}
-                className="flex items-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition"
+                variants={itemVariants}
+                className="flex items-center p-6 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
               >
                 <item.icon className={`w-10 h-10 ${item.color} mr-4`} />
                 <div>
@@ -88,10 +147,8 @@ export default function ServiceArea() {
 
           {/* Right: Map */}
           <motion.div
-            initial={{ x: 50, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            className="relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition"
+            variants={itemVariants}
+            className="relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300"
           >
             <MapContainer
               center={malabeCoords}
@@ -103,21 +160,22 @@ export default function ServiceArea() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {/* 10 km service radius */}
+              {/* 5 km service radius */}
               <Circle
                 center={malabeCoords}
-                radius={3000}
-                pathOptions={{ fillColor: "orange", color: "orange", fillOpacity: 0.2 }}
+                radius={5000}
+                pathOptions={{ fillColor: "#F97316", color: "#F97316", fillOpacity: 0.2 }}
               />
               {/* Marker */}
               <Marker position={malabeCoords}>
                 <Popup>
-                  Malabe Base - Service Area within 10 km radius.
+                  <b>Malabe Base</b> <br />
+                  Delivering within 5 km radius 
                 </Popup>
               </Marker>
             </MapContainer>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
