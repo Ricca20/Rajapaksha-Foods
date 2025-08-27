@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGetMenuQuery } from '../lib/api';
 
 const MenuPage = () => {
   const { data: menu, error, isLoading } = useGetMenuQuery();
@@ -10,18 +11,6 @@ const MenuPage = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axios.get('http://localhost:5001/api/menu')
-      .then((res) => {
-        setMenu(res.data.data);
-        setLoading(false);
-        console.log(res.data.data);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
 
 
   if (loading) return <div>Loading menu...</div>;
