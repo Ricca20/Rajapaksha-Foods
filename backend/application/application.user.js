@@ -1,6 +1,6 @@
 import User from '../infastructure/infastructure.user.js';
 
-// Clerk webhook handler for all user events (robust parsing + idempotent upserts)
+
 export const handleWebhook = async (req, res) => {
   try {
     // Normalize/parse the incoming body to a JS object (supports raw Buffer/string/JSON)
