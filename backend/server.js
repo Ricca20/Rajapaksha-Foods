@@ -20,7 +20,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use("/api/menu", menuRoutes);
-app.use("/api/user", UserRouter);
+app.use("/api/user",express.raw({ type: "application/json" }), UserRouter);
 
 connectDB();
 app.get('/', async (req, res) => {

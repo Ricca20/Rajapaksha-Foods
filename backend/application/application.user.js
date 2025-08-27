@@ -1,21 +1,42 @@
 import User from '../infastructure/infastructure.user.js';
+import { Webhook } from 'svix';
 
 // Clerk webhook handler for all user events (robust parsing + idempotent upserts)
 export const handleWebhook = async (req, res) => {
   try {
-    // Normalize/parse the incoming body to a JS object (supports raw Buffer/string/JSON)
+    // Collect required Svix headers
+    const svix_id = req.headers['svix-id'];
+    const svix_timestamp = req.headers['svix-timestamp'];
+    const svix_signature = req.headers['svix-signature'];
+    if (!svix_id || !svix_timestamp || !svix_signature) {
+      return res.status(400).json({ success: false, error: 'Missing Svix headers' });
+    }
+
+    // Get raw payload string (supports raw Buffer / string / JSON)
+    let payloadString;
+    if (Buffer.isBuffer(req.body)) payloadString = req.body.toString('utf8');
+    else if (typeof req.body === 'string') payloadString = req.body;
+    else payloadString = JSON.stringify(req.body || {});
+
+    // Verify with Svix
+    const secret = process.env.CLERK_WEBHOOK_SECRET;
+    if (!secret) {
+      return res.status(500).json({ success: false, error: 'Missing CLERK_WEBHOOK_SECRET' });
+    }
+    const wh = new Webhook(secret);
     let event;
-    if (Buffer.isBuffer(req.body)) {
-      event = JSON.parse(req.body.toString());
-    } else if (typeof req.body === 'string') {
-      event = JSON.parse(req.body);
-    } else {
-      event = req.body;
+    try {
+      event = wh.verify(payloadString, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      });
+    } catch (e) {
+      return res.status(400).json({ success: false, error: 'Invalid signature' });
     }
 
     const eventType = event?.type;
     const payload = event?.data;
-
     if (!payload) {
       return res.status(400).json({ success: false, error: 'No user data in webhook payload' });
     }
@@ -23,13 +44,11 @@ export const handleWebhook = async (req, res) => {
     // Map Clerk user -> our User model
     const getPrimaryEmail = (p) => {
       if (!Array.isArray(p?.email_addresses)) return '';
-      // Try primary id first
       const primaryId = p.primary_email_address_id;
       if (primaryId) {
         const primary = p.email_addresses.find(e => e.id === primaryId);
         if (primary?.email_address) return primary.email_address;
       }
-      // Fallback: first email
       return p.email_addresses[0]?.email_address || '';
     };
 
@@ -44,23 +63,13 @@ export const handleWebhook = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing required fields clerkId or email' });
     }
 
-    if (eventType === 'user.created') {
-      // Idempotent create: upsert if not exists
-      const result = await User.updateOne(
-        { clerkId: userData.clerkId },
-        { $setOnInsert: userData },
-        { upsert: true }
-      );
-      return res.status(200).json({ success: true, upserted: result.upsertedCount === 1 });
-    }
-
-    if (eventType === 'user.updated') {
-      const updated = await User.findOneAndUpdate(
+    if (eventType === 'user.created' || eventType === 'user.updated') {
+      const user = await User.findOneAndUpdate(
         { clerkId: userData.clerkId },
         { $set: userData },
-        { new: true }
+        { upsert: true, new: true }
       );
-      return res.status(200).json({ success: true, user: updated });
+      return res.status(200).json({ success: true, user });
     }
 
     if (eventType === 'user.deleted') {
@@ -68,10 +77,8 @@ export const handleWebhook = async (req, res) => {
       return res.status(200).json({ success: true, deleted: true });
     }
 
-    // Ignore other events
     return res.status(200).json({ success: true, message: 'Event ignored' });
   } catch (err) {
-    // Handle duplicate key gracefully
     if (err?.code === 11000) {
       return res.status(200).json({ success: true, message: 'Duplicate (already processed)' });
     }
