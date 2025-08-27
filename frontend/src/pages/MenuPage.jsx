@@ -13,7 +13,7 @@ const MenuPage = () => {
 
 
 
-  if (loading) return <div>Loading menu...</div>;
+  if (isLoading) return <div>Loading menu...</div>;
   if (error) return <div>Error: {error}</div>;
   if (!menu) return <div>No menu found.</div>;
 
