@@ -23,8 +23,21 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/user", UserRouter);
 
 connectDB();
-app.get('/', (req, res) => {
-	res.send('Hello');
+app.get('/', async (req, res) => {
+  let dbStatus = 'unknown';
+  try {
+    // 1 = connected, 2 = connecting, 0 = disconnected, 3 = disconnecting
+    const state = (await import('mongoose')).default.connection.readyState;
+    if (state === 1) dbStatus = 'connected';
+    else if (state === 2) dbStatus = 'connecting';
+    else if (state === 0) dbStatus = 'disconnected';
+    else if (state === 3) dbStatus = 'disconnecting';
+    console.log(`MongoDB status: ${dbStatus}`);
+  } catch (err) {
+    dbStatus = 'error';
+    console.log('Error checking MongoDB status:', err.message);
+  }
+  res.send(`Hello. MongoDB status: ${dbStatus}`);
 });
 
 app.listen(PORT, () => {
