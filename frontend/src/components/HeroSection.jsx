@@ -2,7 +2,7 @@ import { Play, ArrowRight } from "lucide-react"
 
 export default function HeroSection() {
     return (
-        <section className="relative bg-white">
+        <section className="relative bg-white mt-8">
           <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 grid lg:grid-cols-2 gap-12 items-center">
             {/* Left content */}
             <div className="space-y-6 text-center lg:text-left">

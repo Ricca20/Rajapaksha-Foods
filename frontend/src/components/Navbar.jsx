@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,82 +15,119 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 inset-x-0 bg-[#e6efe5] shadow-md z-50">
+
+    <nav className="fixed top-0 inset-x-0 bg-gray-100 shadow-md z-50">
       {/* bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <a href="/" className="flex items-center gap-2 justify-start">
-            <img 
-            src="/src/assets/logo.jpeg" 
-            alt="Rajapaksha Foods Logo" 
-            className="h-10 w-auto object-contain"
-          />
-          <span className="font-bold text-lg text-gray-800 tracking-wide">
-            Rajapaksha Foods
-          </span>
-          </a>
+        <div className="flex items-center h-18">
+          {/* Left: Logo */}
+          <div className="flex-1 flex items-center justify-start">
+            <a href="/" className="flex items-center">
+              <img 
+                src="/src/assets/logo2.png" 
+                alt="Rajapaksha Foods Logo" 
+                className="h-15 w-auto object-contain rounded-full border border-orange-500 shadow-lg"
+              />
+              <span className="font-bold text-lg text-gray-900 tracking-wide ml-2">
+                <span className="font-bold text-lg text-orange-500">Rajapaksha</span> Foods
+              </span>
+            </a>
+          </div>
 
-          {/* Desktop menu */}
-          <div className="hidden md:flex items-center space-x-6">
+          {/* Center: Desktop menu (hidden on mobile) */}
+          <div className="flex-3 hidden lg:flex items-center justify-center">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={() => setActive(link.name)}
-                className={`font-medium transition duration-200 ${
+                className={`mx-3 font-medium transition duration-200${
                   active === link.name
-                    ? "text-yellow-300 border-b-2 border-yellow-300"
-                    : "text-white hover:text-yellow-300"
+                    ? "text-orange-500 border-b-2 border-orange-500"
+                    : "text-gray-900 hover:text-orange-500"
                 }`}
               >
                 {link.name}
               </a>
             ))}
-
-            {/* Auth (Clerk) */}
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton afterSignInUrl="/" />
-            </SignedOut>
           </div>
 
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setIsOpen((o) => !o)}
-            className="md:hidden text-white focus:outline-none"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? (
-              // X icon
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              // Hamburger
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
+          {/* Right: Auth (Clerk) (hidden on mobile) */}
+          <div className="flex-1 flex items-center justify-end">
+            <div className="hidden lg:flex items-center gap-4">
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              <SignedOut>
+                <button className="px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg hover:cursor-pointer">
+                  <SignInButton afterSignInUrl="/" />
+                </button>
+                <button className="px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg hover:cursor-pointer">
+                  <SignUpButton afterSignUpUrl="/" />
+                </button>
+              </SignedOut>
+            </div>
+            {/* Mobile toggle */}
+            <button
+              onClick={() => setIsOpen((o) => !o)}
+              className="lg:hidden text-orange-500 focus:outline-none ml-2"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? (
+                // X icon
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                // Hamburger
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile dropdown */}
       <div
-       
-        className={`md:hidden inset-x-0 bg-[#e6efe5] shadow-md z-50 transition-all duration-300 overflow-hidden ${
-          isOpen ? "max-h-96" : "max-h-0"
+        className={`lg:hidden fixed top-16 left-0 right-0 bg-gray-100 shadow-md z-50 transition-all duration-300 overflow-hidden ${
+          isOpen ? "max-h-[500px]" : "max-h-0"
         }`}
       >
-        <div className="px-4 pt-2 pb-4 space-y-2">
+        <div className="flex flex-col px-4 pt-4 pb-6 space-y-4">
+          {/* Mobile menu links */}
+          <div className="flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={() => { setActive(link.name); setIsOpen(false); }}
+                className={`block py-2 px-3 rounded-lg text-base font-medium transition duration-200 ${
+                  active === link.name
+                    ? "bg-orange-100 text-orange-600"
+                    : "text-gray-900 hover:bg-orange-50 hover:text-orange-500"
+                }`}
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+          {/* Auth buttons */}
           <SignedOut>
-             <SignInButton />
+            <div className="flex gap-4">
+              <button className="flex-1 px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg">
+                <SignInButton afterSignInUrl="/" />
+              </button>
+              <button className="flex-1 px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg">
+                <SignUpButton afterSignUpUrl="/" />
+              </button>
+            </div>
           </SignedOut>
           <SignedIn>
-             <UserButton />
+            <div className="flex justify-center">
+              <UserButton />
+            </div>
           </SignedIn>
         </div>
       </div>
