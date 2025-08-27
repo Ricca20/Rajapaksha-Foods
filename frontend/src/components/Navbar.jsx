@@ -56,15 +56,26 @@ export default function Navbar() {
           <div className="flex-1 flex items-center justify-end">
             <div className="hidden lg:flex items-center gap-4">
               <SignedIn>
-                <UserButton afterSignOutUrl="/" />
+                <UserButton 
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-10 h-10 rounded-full"
+                    }
+                  }}
+                />
               </SignedIn>
               <SignedOut>
-                <button className="px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg hover:cursor-pointer">
-                  <SignInButton afterSignInUrl="/" />
-                </button>
-                <button className="px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg hover:cursor-pointer">
-                  <SignUpButton afterSignUpUrl="/" />
-                </button>
+                <SignInButton mode="modal">
+                  <button className="px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg hover:cursor-pointer">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg hover:cursor-pointer ml-4">
+                    Sign Up
+                  </button>
+                </SignUpButton>
               </SignedOut>
             </div>
             {/* Mobile toggle */}
@@ -116,17 +127,28 @@ export default function Navbar() {
           {/* Auth buttons */}
           <SignedOut>
             <div className="flex gap-4">
-              <button className="flex-1 px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg">
-                <SignInButton afterSignInUrl="/" />
-              </button>
-              <button className="flex-1 px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg">
-                <SignUpButton afterSignUpUrl="/" />
-              </button>
+              <SignInButton mode="modal">
+                <button className="flex-1 px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="flex-1 px-4 py-2 bg-[#F97316] text-white rounded-lg hover:bg-[#e5670d] transition-colors shadow-lg">
+                  Sign Up
+                </button>
+              </SignUpButton>
             </div>
           </SignedOut>
           <SignedIn>
             <div className="flex justify-center">
-              <UserButton />
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10 rounded-full"
+                  }
+                }}
+              />
             </div>
           </SignedIn>
         </div>

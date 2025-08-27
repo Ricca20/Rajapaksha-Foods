@@ -9,7 +9,7 @@ const CheckoutPage = () => {
   const { menuItems, selectedPrice, selectedPortion, selectedAddOn } =
     location.state || {};
 
-  // Hardcoded delivery address for now
+
   const deliveryAddress = {
     name: "John Doe",
     street: "123 Main Street",
