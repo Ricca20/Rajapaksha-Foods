@@ -1,97 +1,136 @@
-import { motion } from "framer-motion";
+// src/components/Navbar.jsx
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: replace with real auth
+  const [active, setActive] = useState("Home");
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Services", href: "/services" },
-    { name: "Programs", href: "/programs" },
-    { name: "Contact", href: "/contact" },
+    { name: "Menu", href: "/menu" },
+    { name: "My Orders", href: "/orders" },
+    { name: "About Us", href: "/about" },
+    { name: "Contact Us", href: "/contact" },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 shadow-md bg-white/70 backdrop-blur-lg">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="text-2xl font-bold text-green-600"
-        >
-          🍽️ Rajapaksha Foods
-        </motion.div>
+    <nav className="fixed top-0 inset-x-0 bg-[#e6efe5] shadow-md z-50">
+      {/* bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 justify-start">
+            <img 
+            src="/src/assets/logo.jpeg" 
+            alt="Rajapaksha Foods Logo" 
+            className="h-10 w-auto object-contain"
+          />
+          <span className="font-bold text-lg text-gray-800 tracking-wide">
+            Rajapaksha Foods
+          </span>
+          </a>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6">
-          {navLinks.map((link, idx) => (
-            <motion.a
-              key={idx}
-              href={link.href}
-              whileHover={{ scale: 1.1 }}
-              className="relative text-gray-700 font-medium hover:text-green-600 transition"
-            >
-              {link.name}
-              <motion.span
-                className="absolute left-0 bottom-[-4px] h-[2px] w-0 bg-green-600"
-                whileHover={{ width: "100%" }}
-                transition={{ duration: 0.3 }}
-              />
-            </motion.a>
-          ))}
+          {/* Desktop menu */}
+          <div className="hidden md:flex items-center space-x-6">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={() => setActive(link.name)}
+                className={`font-medium transition duration-200 ${
+                  active === link.name
+                    ? "text-yellow-300 border-b-2 border-yellow-300"
+                    : "text-white hover:text-yellow-300"
+                }`}
+              >
+                {link.name}
+              </a>
+            ))}
 
-          {/* Login & Register */}
-          <div className="flex items-center gap-3">
-            <button className="px-4 py-2 rounded-xl border border-green-600 text-green-600 font-medium hover:bg-green-600 hover:text-white transition">
-              Login
-            </button>
-            <button className="px-4 py-2 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md">
-              Register
-            </button>
+            {/* Auth */}
+            {isLoggedIn ? (
+              <a
+                href="/profile"
+                className="flex items-center gap-2 text-white hover:text-yellow-300 transition duration-200"
+              >
+                {/* user icon (inline SVG) */}
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A9 9 0 1112 21a9 9 0 01-6.879-3.196z" />
+                </svg>
+                Profile
+              </a>
+            ) : (
+              <a
+                href="/login"
+                className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition duration-200"
+              >
+                Login / Register
+              </a>
+            )}
           </div>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-700">
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          {/* Mobile toggle */}
+          <button
+            onClick={() => setIsOpen((o) => !o)}
+            className="md:hidden text-white focus:outline-none"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? (
+              // X icon
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              // Hamburger
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown */}
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:hidden bg-white/90 backdrop-blur-md shadow-md px-6 py-4 flex flex-col gap-4"
-        >
-          {navLinks.map((link, idx) => (
+      {/* Mobile dropdown */}
+      <div
+       
+        className={`md:hidden inset-x-0 bg-[#e6efe5] shadow-md z-50 transition-all duration-300 overflow-hidden ${
+          isOpen ? "max-h-96" : "max-h-0"
+        }`}
+      >
+        <div className="px-4 pt-2 pb-4 space-y-2">
+          {navLinks.map((link) => (
             <a
-              key={idx}
+              key={link.name}
               href={link.href}
-              className="text-gray-700 font-medium hover:text-green-600 transition"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setActive(link.name);
+                setIsOpen(false);
+              }}
+              className={`block font-medium transition duration-200 ${
+                active === link.name
+                  ? "text-yellow-300 border-b border-yellow-300"
+                  : "text-white hover:text-yellow-300"
+              }`}
             >
               {link.name}
             </a>
           ))}
 
-          {/* Mobile Login & Register */}
-          <div className="flex flex-col gap-3 mt-2">
-            <button className="px-4 py-2 rounded-xl border border-green-600 text-green-600 font-medium hover:bg-green-600 hover:text-white transition">
-              Login
-            </button>
-            <button className="px-4 py-2 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md">
-              Register
-            </button>
-          </div>
-        </motion.div>
-      )}
+          {isLoggedIn ? (
+            <a href="/profile" className="block text-white hover:text-yellow-300 transition duration-200">
+              Profile
+            </a>
+          ) : (
+            <a
+              href="/login"
+              className="block bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition duration-200"
+            >
+              Login / Register
+            </a>
+          )}
+        </div>
+      </div>
     </nav>
   );
 }
