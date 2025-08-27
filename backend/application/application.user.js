@@ -57,7 +57,8 @@ export const handleWebhook = async (req, res) => {
       name: (payload.first_name || payload.given_name || '') + (payload.last_name || payload.family_name ? ` ${payload.last_name || payload.family_name}` : ''),
       email: getPrimaryEmail(payload),
       address: ''
-    };
+    };   
+    
 
     if (!userData.clerkId || !userData.email) {
       return res.status(400).json({ success: false, error: 'Missing required fields clerkId or email' });
