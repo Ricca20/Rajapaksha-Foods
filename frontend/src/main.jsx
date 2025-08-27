@@ -4,12 +4,23 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter,Routes,Route } from "react-router";
 import Home from './pages/Home.jsx';
+import { ClerkProvider } from '@clerk/clerk-react';
+import { SignIn } from '@clerk/clerk-react';
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Publishable Key');
+}
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home/>}/>
-      </Routes>
-    </BrowserRouter>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl={"/"}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home/>}/>
+          <Route path='/signin' element={<SignIn/>}/>
+        </Routes>
+      </BrowserRouter>
+    </ClerkProvider>
   </StrictMode>,
 )
