@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import HeroSection from "../components/HeroSection"
 import TopCategories from "../components/TopCategories"
 import OrderSection from "../components/OrderSection"
@@ -21,25 +20,6 @@ export default function Home() {
       <Features />
       <FoodProcess />
       <CustomerReviews/>
-=======
-import React from 'react'
-import Navbar from '../components/Navbar'
-import Footer from '../components/footer'
-
-const Home = () => {
-  return (
-    <div>
-      <Navbar />
-      <h1>Welcome to Rajapaksha Foods</h1>
-      <p>Your one-stop solution for all your food needs.</p>
-
-
-
-
-
-
-
->>>>>>> RAJ-63-as-a-customer-i-want-a-navigation-bar-so-that-i-can-easily-move-between-menu-orders-and-profile-pages
       
       <Footer />
     </div>
