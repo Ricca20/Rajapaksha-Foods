@@ -1,5 +1,5 @@
 import { Play } from "lucide-react";
-import logo from "../assets/logo.jpeg"; 
+import logo from "../assets/logo2.png"; 
 
 export default function HeroSection() {
   return (
