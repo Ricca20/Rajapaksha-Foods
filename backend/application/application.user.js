@@ -1,86 +1,69 @@
-import User from '../infastructure/infastructure.user.js';
-
+// application.user.js
+import User from "../infastructure/infastructure.user.js";
+import { Webhook } from "svix";
 
 export const handleWebhook = async (req, res) => {
   try {
-    // Normalize/parse the incoming body to a JS object (supports raw Buffer/string/JSON)
-    let event;
-    if (Buffer.isBuffer(req.body)) {
-      event = JSON.parse(req.body.toString());
-    } else if (typeof req.body === 'string') {
-      event = JSON.parse(req.body);
-    } else {
-      event = req.body;
+    const payload = req.body;
+    const headers = req.headers;
+
+    // ---- Verify webhook ----
+    const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+    let evt;
+    try {
+      evt = wh.verify(JSON.stringify(payload), {
+        "svix-id": headers["svix-id"],
+        "svix-timestamp": headers["svix-timestamp"],
+        "svix-signature": headers["svix-signature"],
+      });
+    } catch (err) {
+      console.error("Webhook signature verification failed:", err.message);
+      return res.status(400).json({ success: false, error: "Invalid signature" });
     }
 
-    const eventType = event?.type;
-    const payload = event?.data;
+    const { type, data } = evt;
 
-    if (!payload) {
-      return res.status(400).json({ success: false, error: 'No user data in webhook payload' });
-    }
+    // ---- Handle Clerk events ----
+    switch (type) {
+      case "user.created": {
+        const newUser = {
+          clerkId: data.id,
+          name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+          email: data.email_addresses?.[0]?.email_address || "",
+        };
 
-    // Map Clerk user -> our User model
-    const getPrimaryEmail = (p) => {
-      if (!Array.isArray(p?.email_addresses)) return '';
-      // Try primary id first
-      const primaryId = p.primary_email_address_id;
-      if (primaryId) {
-        const primary = p.email_addresses.find(e => e.id === primaryId);
-        if (primary?.email_address) return primary.email_address;
+        await User.findOneAndUpdate({ clerkId: data.id }, newUser, {
+          upsert: true,
+          new: true,
+        });
+
+        return res.status(200).json({ success: true, message: "User created" });
       }
-      // Fallback: first email
-      return p.email_addresses[0]?.email_address || '';
-    };
 
-    const userData = {
-      clerkId: payload.id,
-      name: (payload.first_name || payload.given_name || '') + (payload.last_name || payload.family_name ? ` ${payload.last_name || payload.family_name}` : ''),
-      email: getPrimaryEmail(payload),
-      address: ''
-    };
+      case "user.updated": {
+        const updatedUser = {
+          name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+          email: data.email_addresses?.[0]?.email_address || "",
+        };
 
-    if (!userData.clerkId || !userData.email) {
-      return res.status(400).json({ success: false, error: 'Missing required fields clerkId or email' });
+        await User.findOneAndUpdate({ clerkId: data.id }, updatedUser, {
+          new: true,
+        });
+
+        return res.status(200).json({ success: true, message: "User updated" });
+      }
+
+      case "user.deleted": {
+        await User.findOneAndDelete({ clerkId: data.id });
+
+        return res.status(200).json({ success: true, message: "User deleted" });
+      }
+
+      default:
+        return res.status(200).json({ success: true, message: "Event ignored" });
     }
-
-    if (eventType === 'user.created') {
-      // Idempotent create: upsert if not exists
-      const result = await User.updateOne(
-        { clerkId: userData.clerkId },
-        { $setOnInsert: userData },
-        { upsert: true }
-      );
-      return res.status(200).json({ success: true, upserted: result.upsertedCount === 1 });
-    }
-
-    if (eventType === 'user.updated') {
-      const updated = await User.findOneAndUpdate(
-        { clerkId: userData.clerkId },
-        { $set: userData },
-        { new: true }
-      );
-      return res.status(200).json({ success: true, user: updated });
-    }
-
-    if (eventType === 'user.deleted') {
-      await User.deleteOne({ clerkId: userData.clerkId });
-      return res.status(200).json({ success: true, deleted: true });
-    }
-
-    // Ignore other events
-    return res.status(200).json({ success: true, message: 'Event ignored' });
-  } catch (err) {
-    // Handle duplicate key gracefully
-    if (err?.code === 11000) {
-      return res.status(200).json({ success: true, message: 'Duplicate (already processed)' });
-    }
-    return res.status(500).json({ success: false, error: err.message });
+  } catch (error) {
+    console.error("Webhook handler error:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
-};
-
-export const clerkNewUser = async (userData) => {
-  const user = new User(userData);
-  await user.save();
-  return user;
 };
