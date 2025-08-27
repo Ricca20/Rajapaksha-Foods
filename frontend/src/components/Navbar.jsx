@@ -1,9 +1,9 @@
-// src/components/Navbar.jsx
+
 import { useState } from "react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: replace with real auth
   const [active, setActive] = useState("Home");
 
   const navLinks = [
@@ -48,26 +48,13 @@ export default function Navbar() {
               </a>
             ))}
 
-            {/* Auth */}
-            {isLoggedIn ? (
-              <a
-                href="/profile"
-                className="flex items-center gap-2 text-white hover:text-yellow-300 transition duration-200"
-              >
-                {/* user icon (inline SVG) */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A9 9 0 1112 21a9 9 0 01-6.879-3.196z" />
-                </svg>
-                Profile
-              </a>
-            ) : (
-              <a
-                href="/login"
-                className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition duration-200"
-              >
-                Login / Register
-              </a>
-            )}
+            {/* Auth (Clerk) */}
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton afterSignInUrl="/" />
+            </SignedOut>
           </div>
 
           {/* Mobile toggle */}
@@ -99,36 +86,12 @@ export default function Navbar() {
         }`}
       >
         <div className="px-4 pt-2 pb-4 space-y-2">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={() => {
-                setActive(link.name);
-                setIsOpen(false);
-              }}
-              className={`block font-medium transition duration-200 ${
-                active === link.name
-                  ? "text-yellow-300 border-b border-yellow-300"
-                  : "text-white hover:text-yellow-300"
-              }`}
-            >
-              {link.name}
-            </a>
-          ))}
-
-          {isLoggedIn ? (
-            <a href="/profile" className="block text-white hover:text-yellow-300 transition duration-200">
-              Profile
-            </a>
-          ) : (
-            <a
-              href="/login"
-              className="block bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition duration-200"
-            >
-              Login / Register
-            </a>
-          )}
+          <SignedOut>
+             <SignInButton />
+          </SignedOut>
+          <SignedIn>
+             <UserButton />
+          </SignedIn>
         </div>
       </div>
     </nav>
