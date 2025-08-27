@@ -7,10 +7,12 @@ import Features from "../components/Features"
 import NutritionProgram from "../components/NutritionProgram"
 import ServiceArea from "../components/ServiceArea"
 import CustomerReviews from "../components/CustomerReviews"
+import Navbar from "../components/Navbar"
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
+      <Navbar/>
       <HeroSection />
       <ServiceArea/>
       <NutritionProgram/>
