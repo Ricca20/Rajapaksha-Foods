@@ -5,7 +5,7 @@ export const createMenu = async (req, res) => {
     const { menuItems, priceFull, priceHalf, addOns } = req.body;
 
     const existingMenu = await Menu.findOne();
-
+    // If no menu exists, create a new one
     if (!existingMenu) {
       const newMenu = new Menu({
         menuItems,
