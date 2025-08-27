@@ -1,55 +1,81 @@
 import User from '../infastructure/infastructure.user.js';
 
-// Clerk webhook handler for all user events
+// Clerk webhook handler for all user events (robust parsing + idempotent upserts)
 export const handleWebhook = async (req, res) => {
   try {
-    const eventType = req.body.type;
-    const payload = req.body.data;
+    // Normalize/parse the incoming body to a JS object (supports raw Buffer/string/JSON)
+    let event;
+    if (Buffer.isBuffer(req.body)) {
+      event = JSON.parse(req.body.toString());
+    } else if (typeof req.body === 'string') {
+      event = JSON.parse(req.body);
+    } else {
+      event = req.body;
+    }
 
-    console.log('Received webhook event:', eventType, payload);
+    const eventType = event?.type;
+    const payload = event?.data;
+
     if (!payload) {
       return res.status(400).json({ success: false, error: 'No user data in webhook payload' });
     }
 
-    // Common user data mapping
+    // Map Clerk user -> our User model
+    const getPrimaryEmail = (p) => {
+      if (!Array.isArray(p?.email_addresses)) return '';
+      // Try primary id first
+      const primaryId = p.primary_email_address_id;
+      if (primaryId) {
+        const primary = p.email_addresses.find(e => e.id === primaryId);
+        if (primary?.email_address) return primary.email_address;
+      }
+      // Fallback: first email
+      return p.email_addresses[0]?.email_address || '';
+    };
+
     const userData = {
       clerkId: payload.id,
-      name: payload.first_name && payload.last_name ? `${payload.first_name} ${payload.last_name}` : payload.username || '',
-      email: payload.email_addresses && payload.email_addresses[0] ? payload.email_addresses[0].email_address : '',
-      address: '' // Fill if you collect address elsewhere
+      name: (payload.first_name || payload.given_name || '') + (payload.last_name || payload.family_name ? ` ${payload.last_name || payload.family_name}` : ''),
+      email: getPrimaryEmail(payload),
+      address: ''
     };
 
     if (!userData.clerkId || !userData.email) {
       return res.status(400).json({ success: false, error: 'Missing required fields clerkId or email' });
     }
 
-    let user;
     if (eventType === 'user.created') {
-      user = new User(userData);
-      await user.save();
-      return res.status(201).json({ success: true, user });
-    } else if (eventType === 'user.updated') {
-      user = await User.findOneAndUpdate(
+      // Idempotent create: upsert if not exists
+      const result = await User.updateOne(
         { clerkId: userData.clerkId },
-        userData,
-        { new: true, upsert: false }
+        { $setOnInsert: userData },
+        { upsert: true }
       );
-      if (!user) {
-        return res.status(404).json({ success: false, error: 'User not found for update' });
-      }
-      return res.status(200).json({ success: true, user });
-    } else if (eventType === 'user.deleted') {
-      user = await User.findOneAndDelete({ clerkId: userData.clerkId });
-      if (!user) {
-        return res.status(404).json({ success: false, error: 'User not found for deletion' });
-      }
-      return res.status(200).json({ success: true, deleted: true });
-    } else {
-      // Ignore other events
-      return res.status(200).json({ success: true, message: 'Event ignored' });
+      return res.status(200).json({ success: true, upserted: result.upsertedCount === 1 });
     }
+
+    if (eventType === 'user.updated') {
+      const updated = await User.findOneAndUpdate(
+        { clerkId: userData.clerkId },
+        { $set: userData },
+        { new: true }
+      );
+      return res.status(200).json({ success: true, user: updated });
+    }
+
+    if (eventType === 'user.deleted') {
+      await User.deleteOne({ clerkId: userData.clerkId });
+      return res.status(200).json({ success: true, deleted: true });
+    }
+
+    // Ignore other events
+    return res.status(200).json({ success: true, message: 'Event ignored' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    // Handle duplicate key gracefully
+    if (err?.code === 11000) {
+      return res.status(200).json({ success: true, message: 'Duplicate (already processed)' });
+    }
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
 
