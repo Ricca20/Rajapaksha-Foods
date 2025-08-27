@@ -18,9 +18,7 @@ export default function Home() {
       <NutritionProgram/>
       <OrderSection />
       <Features />
-      <FoodProcess />
       <CustomerReviews/>
-      
       <Footer />
     </div>
   )

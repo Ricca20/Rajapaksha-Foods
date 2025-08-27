@@ -12,7 +12,7 @@ export default function Footer() {
                 <span className="font-bold text-gray-900">Rajapaksha Foods</span>
               </div>
               <p className="text-gray-600 text-sm max-w-xs">
-                Delivering delicious meals to SLIIT students with love and care since 2023.
+                Delivering delicious meals with love and care since 2023.
               </p>
             </div>
   
