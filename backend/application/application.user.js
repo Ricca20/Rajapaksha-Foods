@@ -1,31 +1,46 @@
 import User from '../infastructure/infastructure.user.js';
 
-// Clerk webhook handler with correct field mapping
-export const ClerkNewUser = async (req, res) => {
+export const handleWebhook = async (req, res) => {
   try {
-    const payload = req.body;
-    const userData = {
-      clerkId: payload.id, // Clerk's user id
-      name: payload.first_name && payload.last_name ? `${payload.first_name} ${payload.last_name}` : payload.username || '',
-      email: payload.email_addresses && payload.email_addresses[0] ? payload.email_addresses[0].email_address : '',
-      address: '' // Fill if you collect address elsewhere
-    };
-    if (!userData.clerkId || !userData.email) {
-      return res.status(400).json({ success: false, error: 'Missing required fields clerkId or email' });
+    const { type, data } = req.body; // Clerk sends event type + user data
+    const clerkId = data.id;
+
+    switch (type) {
+      case "user.created":
+        await User.create({
+          clerkId,
+          name: data.first_name + " " + (data.last_name || ""),
+          email: data.email_addresses?.[0]?.email_address,
+          address: data.public_metadata?.address || "", // optional
+        });
+        console.log("User created:", data.id);
+        break;
+
+      case "user.updated":
+        await User.findOneAndUpdate(
+          { clerkId },
+          {
+            name: data.first_name + " " + (data.last_name || ""),
+            email: data.email_addresses?.[0]?.email_address,
+            address: data.public_metadata?.address || "",
+          },
+          { new: true }
+        );
+        console.log("User updated:", data.id);
+        break;
+
+      case "user.deleted":
+        await User.findOneAndDelete({ clerkId });
+        console.log("User deleted:", data.id);
+        break;
+
+      default:
+        console.log("Unhandled webhook event:", type);
     }
-    const user = new User(userData);
-    await user.save();
-    res.status(201).json({ success: true, user });
+
+    return res.status(200).json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Webhook error:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
-
-export const clerkNewUser = async (userData) => {
-  const user = new User(userData);
-  await user.save();
-  return user;
-};
-
-
-

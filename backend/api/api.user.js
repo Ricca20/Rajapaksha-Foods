@@ -1,8 +1,8 @@
 import express from 'express';
-import { ClerkNewUser } from '../application/application.user.js';
+import { handleWebhook } from '../application/application.user.js';
 
 const UserRouter = express.Router();
 
-UserRouter.post("/new-user", ClerkNewUser);
+UserRouter.post("/webhook", handleWebhook);
 
 export default UserRouter;
