@@ -1,41 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useGetMenuQuery } from '../lib/api';
 
 const MenuPage = () => {
-  const [menu, setMenu] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: menu, error, isLoading } = useGetMenuQuery();
   const [selectedAddOn, setSelectedAddOn] = useState(null);
   const [selectedPrice, setSelectedPrice] = useState(null);
 
+
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axios.get('http://localhost:5001/api/menu')
-      .then((res) => {
-        setMenu(res.data.data);
-        setLoading(false);
-        console.log(res.data.data);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
 
-
-  if (loading) return <div>Loading menu...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!menu) return <div>No menu found.</div>;
+  if (isLoading) return <div>Loading menu...</div>;
+  if (!menu || !menu.data) return <div>No menu found.</div>;
 
 
   return (
-
     <div className="max-w-xl mx-auto mt-18 p-6 border border-gray-200 rounded-lg bg-white shadow-xl justify-center">
       <h1 className="text-3xl font-bold text-center mb-6">Today's Menu</h1>
       <ul className="mb-6">
-        {menu.menuItems && menu.menuItems.map((item, idx) => (
+        {menu.data.menuItems && menu.data.menuItems.map((item, idx) => (
           <li key={idx} className="mb-4 pb-2 border-b border-gray-300 text-lg font-medium text-center">
             {item}
           </li>
@@ -53,7 +38,7 @@ const MenuPage = () => {
               onChange={() => setSelectedPrice('full')}
               className="accent-blue-600"
             />
-            <span>Full (Rs. {menu.priceFull}.00)</span>
+            <span>Full (Rs. {menu.data.priceFull}.00)</span>
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -64,7 +49,7 @@ const MenuPage = () => {
               onChange={() => setSelectedPrice('half')}
               className="accent-blue-600"
             />
-            <span>Normal (Rs. {menu.priceHalf}.00)</span>
+            <span>Normal (Rs. {menu.data.priceHalf}.00)</span>
           </label>
         </form>
         {selectedPrice && (
@@ -73,14 +58,14 @@ const MenuPage = () => {
           </div>
         )}
       </div>
-      {menu.addOns && (() => {
+      {menu.data.addOns && (() => {
         const addOnNames = [
           { key: 'isChicken', label: 'Chicken' },
           { key: 'isEgg', label: 'Egg' },
           { key: 'isFish', label: 'Fish' },
           { key: 'isSausage', label: 'Sausage' }
         ];
-        const enabledAddOns = addOnNames.filter(a => menu.addOns[a.key]);
+        const enabledAddOns = addOnNames.filter(a => menu.data.addOns[a.key]);
         if (enabledAddOns.length === 0) return null;
         return (
           <div className="mt-6">
@@ -113,18 +98,24 @@ const MenuPage = () => {
           className="px-4 py-2 text-lg bg-blue-600 text-white rounded hover:bg-blue-700 transition"
           onClick={() => {
             const addOnNames = [
-              { key: 'isChicken', label: 'Chicken' },
-              { key: 'isEgg', label: 'Egg' },
-              { key: 'isFish', label: 'Fish' },
-              { key: 'isSausage', label: 'Sausage' }
+              { key: 'isChicken', label: 'Chicken', addonPrice: 100 },
+              { key: 'isEgg', label: 'Egg', addonPrice: 50 },
+              { key: 'isFish', label: 'Fish', addonPrice: 100 },
+              { key: 'isSausage', label: 'Sausage', addonPrice: 100 }
             ];
-            const selectedAddOnLabel = addOnNames.find(a => a.key === selectedAddOn)?.label || null;
+            const selectedAddOnObj = addOnNames.find(a => a.key === selectedAddOn);
+            const selectedAddOnLabel = selectedAddOnObj?.label || null;
+            const addOnPrice = selectedAddOnObj?.addonPrice || 0;
+            const basePrice = selectedPrice === 'full' ? menu.data.priceFull : menu.data.priceHalf;
+            const totalPrice = basePrice + addOnPrice;
             navigate('/checkout', {
               state: {
-                menuItems: menu.menuItems,
-                selectedPrice: selectedPrice === 'full' ? menu.priceFull : menu.priceHalf,
+                menuItems: menu.data.menuItems,
+                selectedPrice: basePrice,
                 selectedPortion: selectedPrice === 'full' ? 'Full' : 'Normal',
-                selectedAddOn: selectedAddOnLabel
+                selectedAddOn: selectedAddOnLabel,
+                addOnPrice,
+                totalPrice
               }
             });
           }}
@@ -133,7 +124,6 @@ const MenuPage = () => {
         </button>
       </div>
     </div>
-    
   );
 };
 

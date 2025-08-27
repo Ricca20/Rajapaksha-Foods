@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 const CheckoutPage = () => {
   const location = useLocation();
-  const { menuItems, selectedPrice, selectedPortion, selectedAddOn } = location.state || {};
+  const { menuItems, selectedPrice, selectedPortion, selectedAddOn, addOnPrice, totalPrice } = location.state || {};
 
   // Hardcoded delivery address for now
   const deliveryAddress = {
@@ -25,9 +25,10 @@ const CheckoutPage = () => {
             <li key={idx} className="mb-1 text-base font-medium text-gray-800">{item}</li>
           ))}
         </ul>
-        <div className="mb-1">Selected Portion: <span className="font-semibold text-blue-600">{selectedPortion}</span></div>
-        <div className="mb-1">Price: <span className="font-semibold text-blue-600">Rs. {selectedPrice}.00</span></div>
-        <div className="mb-1">Add-On: <span className="font-semibold text-blue-600">{selectedAddOn || 'None'}</span></div>
+  <div className="mb-1">Selected Portion: <span className="font-semibold text-blue-600">{selectedPortion}</span></div>
+  <div className="mb-1">Base Price: <span className="font-semibold text-blue-600">Rs. {selectedPrice}.00</span></div>
+  <div className="mb-1">Add-On: <span className="font-semibold text-blue-600">{selectedAddOn || 'None'}</span> {addOnPrice ? <span className="text-gray-500">(+Rs. {addOnPrice})</span> : null}</div>
+  <div className="mb-1 font-bold text-lg">Total: <span className="font-semibold text-blue-700">Rs. {totalPrice}.00</span></div>
       </div>
       {/* Delivery Address Section */}
       <div className="pt-4">

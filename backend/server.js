@@ -7,11 +7,14 @@ import connectDB from './infastructure/db.js';
 
 import menuRoutes from './api/api.menu.js';
 
+const frontendURL = process.env.VITE_FRONTEND_URL;
+const backendURL = process.env.VITE_BACKEND_URL;
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-	origin: 'http://localhost:5173',
+	origin: frontendURL,
 	credentials: true, 
 }));
 
@@ -24,5 +27,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-	console.log(`Server running on http://localhost:${PORT}`);
+	console.log(`Server running on ${backendURL}`);
 });
