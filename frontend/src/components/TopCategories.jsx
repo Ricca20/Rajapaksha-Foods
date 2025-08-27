@@ -17,7 +17,6 @@ export default function TopCategories() {
     { id: 8, name: "Vegetarian" },
   ];
 
-  // Auto-scroll animation
   useEffect(() => {
     if (isPaused) return;
 

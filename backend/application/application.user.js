@@ -7,7 +7,7 @@ export const handleWebhook = async (req, res) => {
     const payload = req.body;
     const headers = req.headers;
 
-    // ---- Verify webhook ----
+    
     const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
     let evt;
     try {
