@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle, MapPin, ShoppingBag, Clock, CreditCard } from "lucide-react";
 import Navbar from "../components/Navbar";
