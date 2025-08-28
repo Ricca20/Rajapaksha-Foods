@@ -22,7 +22,7 @@ const CheckoutPage = () => {
   });
      
  
-  const { menuItems, selectedPrice, selectedPortion, selectedAddOn, total } = orderDetails;
+  const { menuItems, selectedPrice, selectedPortion, selectedAddOn, total, quantity } = orderDetails;
   // Fetch user profile (including address) from backend using Clerk user id
   const clerkId = user?.id;
   const { data: userResp, isFetching: isUserLoading, refetch: refetchUser } = useGetUserByClerkIdQuery(clerkId, { skip: !clerkId });
