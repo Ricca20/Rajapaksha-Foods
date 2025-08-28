@@ -8,7 +8,7 @@ import menuRoutes from './api/api.menu.js';
 import UserRouter from "./api/api.user.js";
 import orderRoutes from './api/api.order.js';
 
-const frontendURL = process.env.VITE_FRONTEND_URL;
+const frontendURL = process.env.VITE_FRONTEND_URL || '*';
 const backendURL = process.env.VITE_BACKEND_URL;
 
 const app = express();
@@ -21,9 +21,13 @@ if (!process.env.CLERK_SECRET_KEY) {
 
 // Initialize Clerk middleware
 const clerk = ClerkExpressWithAuth();
+
+// Configure CORS
 app.use(cors({
-	origin: frontendURL,
-	credentials: true, 
+  origin: frontendURL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'clerk-session-id']
 }));
 
 app.use(express.json());
