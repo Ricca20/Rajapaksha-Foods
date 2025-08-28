@@ -1,10 +1,10 @@
 
 import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/clerk-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [active, setActive] = useState("Home");
   const { isSignedIn, sessionClaims } = useAuth();
   const isAdmin = isSignedIn && sessionClaims?.metadata?.role === 'admin';
 
@@ -25,7 +25,7 @@ export default function Navbar() {
         <div className="flex items-center h-18">
           {/* Left: Logo */}
           <div className="flex-1 flex items-center justify-start">
-            <a href="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
               <img 
                 src="/src/assets/logo2.png" 
                 alt="Rajapaksha Foods Logo" 
@@ -34,24 +34,25 @@ export default function Navbar() {
               <span className="font-bold text-lg text-gray-900 tracking-wide ml-2">
                 <span className="font-bold text-lg text-orange-500">Rajapaksha</span> Foods
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Center: Desktop menu (hidden on mobile) */}
           <div className="flex-3 hidden lg:flex items-center justify-center">
             {navLinks.map((link) => (
-              <a
+              <NavLink
                 key={link.name}
-                href={link.href}
-                onClick={() => setActive(link.name)}
-                className={`mx-3 font-medium transition duration-200${
-                  active === link.name
-                    ? "text-orange-500 border-b-2 border-orange-500"
-                    : "text-gray-900 hover:text-orange-500"
-                }`}
+                to={link.href}
+                end={link.href === '/'}
+                className={({ isActive }) =>
+                  `mx-3 font-medium transition duration-200 ` +
+                  (isActive
+                    ? 'text-orange-500 border-b-2 border-orange-500'
+                    : 'text-gray-900 hover:text-orange-500')
+                }
               >
                 {link.name}
-              </a>
+              </NavLink>
             ))}
           </div>
 
@@ -113,18 +114,20 @@ export default function Navbar() {
           {/* Mobile menu links */}
           <div className="flex flex-col gap-2">
             {navLinks.map((link) => (
-              <a
+              <NavLink
                 key={link.name}
-                href={link.href}
-                onClick={() => { setActive(link.name); setIsOpen(false); }}
-                className={`block py-2 px-3 rounded-lg text-base font-medium transition duration-200 ${
-                  active === link.name
-                    ? "bg-orange-100 text-orange-600"
-                    : "text-gray-900 hover:bg-orange-50 hover:text-orange-500"
-                }`}
+                to={link.href}
+                end={link.href === '/'}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) =>
+                  `block py-2 px-3 rounded-lg text-base font-medium transition duration-200 ` +
+                  (isActive
+                    ? 'bg-orange-100 text-orange-600'
+                    : 'text-gray-900 hover:bg-orange-50 hover:text-orange-500')
+                }
               >
                 {link.name}
-              </a>
+              </NavLink>
             ))}
           </div>
           {/* Auth buttons */}

@@ -39,6 +39,7 @@ const CheckoutPage = () => {
     postalCode: '',
     phone: '',
   });
+  const [specialNote, setSpecialNote] = useState(() => orderDetails?.specialNote || '');
 
   useEffect(() => {
     if (deliveryAddressObj) {
@@ -128,7 +129,7 @@ const CheckoutPage = () => {
               </div>
               {user && (
                 <button
-                  className="text-sm font-medium text-orange-600 hover:text-orange-700 underline"
+                  className="text-sm font-medium text-orange-600 hover:text-orange-700 underline hover:cursor-pointer"
                   onClick={() => setShowAddressModal(true)}
                 >
                   Change
@@ -285,13 +286,19 @@ const CheckoutPage = () => {
             </div>
           </div>
 
-          {/* Delivery Time */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 flex items-center gap-3">
-            <Clock className="text-orange-500" />
-            <div>
-              <h3 className="font-semibold text-gray-900">Estimated Delivery</h3>
-              <p className="text-gray-600">30 - 40 mins</p>
+          {/* Special Note */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="text-orange-500" />
+              <h3 className="font-semibold text-gray-900">Special Note</h3>
             </div>
+            <textarea
+              value={specialNote}
+              onChange={(e) => setSpecialNote(e.target.value)}
+              placeholder="Add any special instructions (e.g., extra spicy)...."
+              className="w-full min-h-[100px] border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
+            />
+            <p className="text-xs text-gray-500 mt-2">We'll do our best to follow your instructions.</p>
           </div>
 
           {/* Payment */}
@@ -313,10 +320,10 @@ const CheckoutPage = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full py-4 bg-orange-500 text-white rounded-full font-semibold text-lg shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2"
+              className="w-full py-4 bg-orange-500 text-white rounded-full font-semibold text-lg shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2 hover:cursor-pointer"
               onClick={async () => {
                 if (!user) {
-                  localStorage.setItem('orderDetails', JSON.stringify({ menuItems, selectedPrice, selectedPortion, selectedAddOn, total, quantity }));
+                  localStorage.setItem('orderDetails', JSON.stringify({ menuItems, selectedPrice, selectedPortion, selectedAddOn, total, quantity, specialNote }));
                   clerk.openSignIn();
                   return;
                 }
@@ -327,6 +334,7 @@ const CheckoutPage = () => {
                   selectedAddOn,
                   quantity,
                   total,
+                  specialNote,
                   deliveryAddress: {
                     name: userDoc?.name || user?.fullName || '',
                     street: deliveryAddressObj?.street || '',

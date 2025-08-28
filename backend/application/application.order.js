@@ -104,3 +104,23 @@ export const listOrdersByUser = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Error fetching orders', error: error.message });
   }
 };
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { userId } = req.body || {};
+    if (!orderId || !userId) {
+      return res.status(400).json({ success: false, message: 'orderId and userId are required' });
+    }
+
+    const order = await Order.findOne({ _id: orderId, userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    await Order.deleteOne({ _id: orderId });
+    return res.status(200).json({ success: true, message: 'Order canceled' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Error canceling order', error: error.message });
+  }
+};

@@ -53,6 +53,13 @@ export const api = createApi({
         getOrdersByUser: builder.query({
             query: (userId) => `/api/orders/user/${userId}`,
         }),
+        cancelOrder: builder.mutation({
+            query: ({ orderId, userId }) => ({
+                url: `/api/orders/${orderId}/cancel`,
+                method: 'POST',
+                body: { userId },
+            }),
+        }),
     }),
 });
 
@@ -65,5 +72,6 @@ export const {
     useSetOrderWindowMutation,
     useGetUserByClerkIdQuery,
     useUpdateUserAddressMutation,
-    useGetOrdersByUserQuery
+    useGetOrdersByUserQuery,
+    useCancelOrderMutation
 } = api;

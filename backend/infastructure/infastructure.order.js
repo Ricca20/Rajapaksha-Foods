@@ -7,6 +7,7 @@ const OrderSchema = new mongoose.Schema({
   selectedPortion: String,
   selectedAddOn: String,
   total: Number,
+  specialNote: String,
   deliveryAddress: {
     name: String,
     street: String,
