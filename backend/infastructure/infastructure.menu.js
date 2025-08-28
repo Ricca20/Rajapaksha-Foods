@@ -1,6 +1,15 @@
 import mongoose from 'mongoose';
 
 const menuSchema = new mongoose.Schema({
+    isOrderingEnabled: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    orderWindowMessage: {
+        type: String,
+        default: "Order window is currently closed. Please check back during our service hours."
+    },
     menuItems: [
         {
             type: String,

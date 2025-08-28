@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
-
+import { ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
 import express from 'express';
 import cors from 'cors';
 import connectDB from './infastructure/db.js';
 import menuRoutes from './api/api.menu.js';
 import UserRouter from "./api/api.user.js";
+import orderRoutes from './api/api.order.js';
 
 const frontendURL = process.env.VITE_FRONTEND_URL;
 const backendURL = process.env.VITE_BACKEND_URL;
@@ -13,14 +14,24 @@ const backendURL = process.env.VITE_BACKEND_URL;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Initialize Clerk with the secret key
+if (!process.env.CLERK_SECRET_KEY) {
+  throw new Error('Missing Clerk Secret Key');
+}
+
+// Initialize Clerk middleware
+const clerk = ClerkExpressWithAuth();
 app.use(cors({
 	origin: frontendURL,
 	credentials: true, 
 }));
 
 app.use(express.json());
-app.use("/api/menu", menuRoutes);
-app.use("/api/user", UserRouter);
+
+// Apply Clerk middleware to protected routes
+app.use("/api/menu", clerk, menuRoutes);
+app.use("/api/user", clerk, UserRouter);
+app.use("/api/orders", clerk, orderRoutes);
 
 connectDB();
 app.get('/', async (req, res) => {

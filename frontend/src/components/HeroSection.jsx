@@ -3,7 +3,7 @@ import logo from "../assets/logo2.png";
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-white">
+    <section className="relative bg-white pt-6">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-20 grid lg:grid-cols-2 gap-12 items-center">
         
         {/* Left content */}
@@ -20,12 +20,10 @@ export default function HeroSection() {
 
           {/* Buttons */}
           <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-            <button className="px-6 py-3 rounded-xl bg-orange-500 text-white font-semibold shadow-md hover:bg-orange-600 transition-all">
+            <button className="px-8 py-3 rounded-xl bg-orange-500 text-white font-semibold shadow-md hover:bg-orange-600 transition-all">
               ORDER NOW →
             </button>
-            <button className="px-6 py-3 rounded-xl bg-white text-orange-500 border border-orange-500 font-semibold hover:bg-orange-500 hover:text-white transition-all flex items-center shadow-sm">
-              WATCH DEMO <Play className="w-4 h-4 ml-2 fill-current" />
-            </button>
+            
           </div>
         </div>
 
