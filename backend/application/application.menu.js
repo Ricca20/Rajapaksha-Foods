@@ -65,3 +65,38 @@ export const getMenu = async (req, res) => {
     });
   }
 };
+
+// Set order window status
+export const setOrderWindow = async (req, res) => {
+  try {
+    const { isEnabled, message } = req.body;
+
+    const menu = await Menu.findOne();
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: "Menu not found"
+      });
+    }
+
+    menu.isOrderingEnabled = isEnabled;
+    if (message) {
+      menu.orderWindowMessage = message;
+    }
+
+    await menu.save();
+
+    return res.status(200).json({
+      success: true,
+      message: isEnabled ? "Order window opened" : "Order window closed",
+      data: menu
+    });
+  } catch (error) {
+    console.error('Error in setOrderWindow:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Error updating order window status",
+      error: error.message
+    });
+  }
+};

@@ -7,6 +7,7 @@ import { useCreateOrderMutation } from '../lib/api';
 import { useUser, useClerk } from '@clerk/clerk-react';
 
 const CheckoutPage = () => {
+
   const location = useLocation();
   const [orderDetails, setOrderDetails] = useState(() => {
     // Try to get from router state first
@@ -18,7 +19,9 @@ const CheckoutPage = () => {
     const saved = localStorage.getItem('orderDetails');
     return saved ? JSON.parse(saved) : {};
   });
-  const { menuItems, selectedPrice, selectedPortion, selectedAddOn, total } = orderDetails;
+     
+  const { menuItems, selectedPrice, selectedPortion, selectedAddOn, total, quantity } = orderDetails;
+  console.log("Order details:", orderDetails);
   const deliveryAddress = {
     name: "John Doe",
     street: "123 Main Street",
@@ -46,6 +49,7 @@ const CheckoutPage = () => {
           className="lg:col-span-2 space-y-8"
         >
           {/* Order Details */}
+         
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <ShoppingBag className="text-orange-500" />
@@ -70,7 +74,19 @@ const CheckoutPage = () => {
                 </span>
               </div>
               <div>
-                Price:{" "}
+                Quantity:{" "}
+                <span className="font-semibold text-orange-500">
+                  {quantity || 1}
+                </span>
+              </div>
+              <div>
+                Price per Pack:{" "}
+                <span className="font-semibold text-orange-500">
+                  Rs. {(total / (quantity || 1)).toFixed(2)}
+                </span>
+              </div>
+              <div>
+                Total Price:{" "}
                 <span className="font-semibold text-orange-500">
                   Rs. {total}.00
                 </span>
@@ -176,7 +192,7 @@ const CheckoutPage = () => {
               className="w-full py-4 bg-orange-500 text-white rounded-full font-semibold text-lg shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2"
               onClick={async () => {
                 if (!user) {
-                  localStorage.setItem('orderDetails', JSON.stringify({ menuItems, selectedPrice, selectedPortion, selectedAddOn, total }));
+                  localStorage.setItem('orderDetails', JSON.stringify({ menuItems, selectedPrice, selectedPortion, selectedAddOn, total, quantity }));
                   clerk.openSignIn();
                   return;
                 }
@@ -185,6 +201,7 @@ const CheckoutPage = () => {
                   menuItems,
                   selectedPortion,
                   selectedAddOn,
+                  quantity,
                   total,
                   deliveryAddress,
                 });

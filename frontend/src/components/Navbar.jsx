@@ -1,10 +1,12 @@
 
 import { useState } from "react";
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/clerk-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [active, setActive] = useState("Home");
+  const { isSignedIn, sessionClaims } = useAuth();
+  const isAdmin = isSignedIn && sessionClaims?.metadata?.role === 'admin';
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -12,6 +14,7 @@ export default function Navbar() {
     { name: "My Orders", href: "/orders" },
     { name: "About Us", href: "/about" },
     { name: "Contact Us", href: "/contact" },
+    ...(isAdmin ? [{ name: "Admin", href: "/admin" }] : []),
   ];
 
   return (

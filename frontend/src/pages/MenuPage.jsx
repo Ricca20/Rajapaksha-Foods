@@ -22,6 +22,7 @@ const MenuPage = () => {
   const { data: menu, error, isLoading } = useGetMenuQuery();
   const [selectedAddOn, setSelectedAddOn] = useState(null);
   const [selectedPrice, setSelectedPrice] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   console.log("Menu data:", menu);
   console.log("Error:", error);
@@ -42,11 +43,11 @@ const MenuPage = () => {
     : [];
 
   const calculateTotal = () => {
-    let total = 0;
-    if (selectedPrice === 'full') total += menu?.data?.priceFull || 0;
-    if (selectedPrice === 'half') total += menu?.data?.priceHalf || 0;
-    if (selectedAddOn) total += addOnNames.find(a => a.key === selectedAddOn)?.price || 0;
-    return total;
+    let baseTotal = 0;
+    if (selectedPrice === 'full') baseTotal += menu?.data?.priceFull || 0;
+    if (selectedPrice === 'half') baseTotal += menu?.data?.priceHalf || 0;
+    if (selectedAddOn) baseTotal += addOnNames.find(a => a.key === selectedAddOn)?.price || 0;
+    return baseTotal * quantity;
   };
 
   const grandTotal = calculateTotal();
@@ -92,16 +93,32 @@ const MenuPage = () => {
     </div>
   );
 
-  if (!menu || !menu.data) return (
+  if (!menu || !menu.data || !menu.data.isOrderingEnabled) return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
       <div className="flex items-center justify-center min-h-screen pt-20">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-          <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <Utensils className="w-8 h-8 text-gray-500" />
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-lg">
+          <div className="w-20 h-20 bg-orange-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <Clock className="w-10 h-10 text-orange-500" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Menu Available</h2>
-          <p className="text-gray-600">Please check back later</p>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            {!menu || !menu.data ? "No Menu Available" : "Order Window Closed"}
+          </h2>
+          <p className="text-gray-600 text-lg mb-6">
+            {!menu || !menu.data 
+              ? "Please check back later" 
+              : menu.data.orderWindowMessage || "Order window is currently closed. Please check back during our service hours."}
+          </p>
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-700 mb-2">Service Hours</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>Breakfast: 6:00 AM - 10:00 AM</p>
+                <p>Lunch: 11:00 AM - 3:00 PM</p>
+                <p>Dinner: 4:00 PM - 9:00 PM</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -215,6 +232,35 @@ const MenuPage = () => {
                 ))}
               </div>
 
+              {/* Quantity Selector */}
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Plus className="w-6 h-6 text-orange-500" />
+                  Select Quantity
+                </h3>
+                <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 rounded-xl">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-10 h-10 flex items-center justify-center bg-white rounded-lg border-2 border-orange-200 text-orange-500 hover:border-orange-500 transition-colors"
+                  >
+                    -
+                  </motion.button>
+                  <span className="text-2xl font-bold text-gray-900 min-w-[3rem] text-center">
+                    {quantity}
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-10 h-10 flex items-center justify-center bg-white rounded-lg border-2 border-orange-200 text-orange-500 hover:border-orange-500 transition-colors"
+                  >
+                    +
+                  </motion.button>
+                </div>
+              </div>
+
               {/* Add Ons */}
               {enabledAddOns.length > 0 && (
                 <div>
@@ -288,14 +334,20 @@ const MenuPage = () => {
                 }`}
                 onClick={() => {
                   const selectedAddOnLabel = addOnNames.find(a => a.key === selectedAddOn)?.label || null;
+               
+                  const basePrice = selectedPrice === 'full' ? menu.data.priceFull : menu.data.priceHalf;
+                  const addOnPrice = addOnNames.find(a => a.key === selectedAddOn)?.price || 0;
+                  const pricePerPack = basePrice + addOnPrice;
+                  
                   navigate('/checkout', {
                     state: {
                       menuItems: menu.data.menuItems,
-                      selectedPrice: selectedPrice === 'full' ? menu.data.priceFull : menu.data.priceHalf,
+                      selectedPrice: basePrice,
                       selectedPortion: selectedPrice === 'full' ? 'Full' : 'Normal',
                       selectedAddOn: selectedAddOnLabel,
-                      addOnPrice: addOnNames.find(a => a.key === selectedAddOn)?.price || 0,
-                      total: grandTotal
+                      addOnPrice: addOnPrice,
+                      quantity: quantity,
+                      total: pricePerPack * quantity
                     }
                   });
                 }}
