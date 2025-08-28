@@ -1,9 +1,18 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { getTodayOrders } from '../../../backend/application/application.order';
+
 export const api = createApi({
     reducerPath: 'api',
-    baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_BACKEND_URL }),
-    tagTypes: ['Menu'],
+    baseQuery: fetchBaseQuery({ 
+        baseUrl: import.meta.env.VITE_BACKEND_URL,
+        prepareHeaders: (headers) => {
+            const token = window.Clerk?.session?.lastActiveToken?.raw;
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
+    }),
+    tagTypes: ['Menu', 'User'],
 
     endpoints: (builder) => ({
         getMenu: builder.query({
@@ -21,6 +30,7 @@ export const api = createApi({
         }),
         getUserByClerkId: builder.query({
             query: (clerkId) => `/api/user/${clerkId}`,
+            providesTags: ['User']
         }),
         updateUserAddress: builder.mutation({
             query: ({ clerkId, address }) => ({
@@ -28,7 +38,7 @@ export const api = createApi({
                 method: 'PUT',
                 body: address,
             }),
-            // Invalidate or refetch queries if you use cache tags in the future
+            invalidatesTags: ['User']
         }),
         createOrder: builder.mutation({
             query: (order) => ({
