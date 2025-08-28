@@ -7,7 +7,7 @@ import { useCreateOrderMutation, useGetUserByClerkIdQuery, useUpdateUserAddressM
 import { useUser, useClerk } from '@clerk/clerk-react';
 
 const CheckoutPage = () => {
-
+  const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
   const [orderDetails, setOrderDetails] = useState(() => {
