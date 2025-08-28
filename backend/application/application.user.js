@@ -67,3 +67,53 @@ export const handleWebhook = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// Get a user by Clerk ID
+export const getUserByClerkId = async (req, res) => {
+  try {
+    const { clerkId } = req.params;
+    if (!clerkId) {
+      return res.status(400).json({ success: false, message: "clerkId is required" });
+    }
+
+    const user = await User.findOne({ clerkId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    console.error("getUserByClerkId error:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Update a user's address by Clerk ID
+export const updateUserAddress = async (req, res) => {
+  try {
+    const { clerkId } = req.params;
+    const { street, city, postalCode, phone } = req.body || {};
+
+    if (!clerkId) {
+      return res.status(400).json({ success: false, message: "clerkId is required" });
+    }
+
+    // Minimal validation; accept partial updates
+    const update = { address: { street, city, postalCode, phone } };
+
+    const updated = await User.findOneAndUpdate(
+      { clerkId },
+      { $set: update },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    console.error("updateUserAddress error:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};

@@ -9,6 +9,7 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import Home from './pages/Home.jsx';
 import MenuPage from './pages/MenuPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
+import OrdersPage from './pages/OrdersPage.jsx';
 
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/" element={<Home/>}/>
             <Route path="/menu" element={<MenuPage/>}/>
             <Route path="/checkout" element={<CheckoutPage/>}/>
+            <Route path="/orders" element={<OrdersPage/>}/>
           </Routes>
         </ClerkProvider>
       </BrowserRouter>
