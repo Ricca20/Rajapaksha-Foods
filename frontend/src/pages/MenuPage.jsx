@@ -49,6 +49,8 @@ const MenuPage = () => {
     return total;
   };
 
+  const grandTotal = calculateTotal();
+
   // Loading State
   if (isLoading) return (
     <div className="min-h-screen bg-gray-100">
@@ -269,7 +271,7 @@ const MenuPage = () => {
                         <div className="text-gray-900 font-semibold">Order Total</div>
                         <div className="text-gray-600 text-sm">Including all selections</div>
                       </div>
-                      <div className="text-2xl font-bold text-orange-500">Rs. {calculateTotal()}.00</div>
+                      <div className="text-2xl font-bold text-orange-500">Rs. {grandTotal}.00</div>
                     </div>
                   </motion.div>
                 )}
@@ -293,7 +295,7 @@ const MenuPage = () => {
                       selectedPortion: selectedPrice === 'full' ? 'Full' : 'Normal',
                       selectedAddOn: selectedAddOnLabel,
                       addOnPrice: addOnNames.find(a => a.key === selectedAddOn)?.price || 0,
-                      total: calculateTotal()
+                      total: grandTotal
                     }
                   });
                 }}

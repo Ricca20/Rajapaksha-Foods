@@ -6,6 +6,7 @@ import cors from 'cors';
 import connectDB from './infastructure/db.js';
 import menuRoutes from './api/api.menu.js';
 import UserRouter from "./api/api.user.js";
+import orderRoutes from './api/api.order.js';
 
 const frontendURL = process.env.VITE_FRONTEND_URL;
 const backendURL = process.env.VITE_BACKEND_URL;
@@ -21,6 +22,7 @@ app.use(cors({
 app.use(express.json());
 app.use("/api/menu", menuRoutes);
 app.use("/api/user", UserRouter);
+app.use("/api/orders", orderRoutes);
 
 connectDB();
 app.get('/', async (req, res) => {
