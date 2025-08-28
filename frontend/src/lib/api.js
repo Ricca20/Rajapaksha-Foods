@@ -19,6 +19,17 @@ export const api = createApi({
             // Invalidate the menu query so it refetches
             invalidatesTags: ['Menu'],
         }),
+        getUserByClerkId: builder.query({
+            query: (clerkId) => `/api/user/${clerkId}`,
+        }),
+        updateUserAddress: builder.mutation({
+            query: ({ clerkId, address }) => ({
+                url: `/api/user/${clerkId}/address`,
+                method: 'PUT',
+                body: address,
+            }),
+            // Invalidate or refetch queries if you use cache tags in the future
+        }),
         createOrder: builder.mutation({
             query: (order) => ({
                 url: '/api/orders',
@@ -39,6 +50,9 @@ export const api = createApi({
                 body: { status },
             }),
         }),
+        getOrdersByUser: builder.query({
+            query: (userId) => `/api/orders/user/${userId}`,
+        }),
     }),
 });
 
@@ -48,5 +62,8 @@ export const {
     useGetAllOrdersQuery, 
     useGetTodayOrdersQuery,
     useUpdateOrderStatusMutation,
-    useSetOrderWindowMutation
+    useSetOrderWindowMutation,
+    useGetUserByClerkIdQuery,
+    useUpdateUserAddressMutation,
+    useGetOrdersByUserQuery
 } = api;

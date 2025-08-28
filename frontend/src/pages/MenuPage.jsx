@@ -138,7 +138,7 @@ const MenuPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-1">
+          <h1 className="text-4xl font-bold text-gray-900 mt-8">
             Today's <span className="text-orange-500">Special Menu</span>
           </h1>
         </motion.div>

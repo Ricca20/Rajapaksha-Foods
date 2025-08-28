@@ -13,6 +13,7 @@ import AdminPage from './pages/AdminPage.jsx';
 import OrdersToday from './pages/OrdersToday.jsx';
 import MealTimeOrders from './pages/MealTimeOrders.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
+import OrdersPage from './pages/OrdersPage.jsx';
 
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')).render(
               {/* <Route path="inventory" element={<Inventory/>}/> */}
               {/* <Route path="employees" element={<Employees/>}/> */}
             </Route>
+            <Route path="/orders" element={<OrdersPage/>}/>
           </Routes>
         </ClerkProvider>
       </BrowserRouter>

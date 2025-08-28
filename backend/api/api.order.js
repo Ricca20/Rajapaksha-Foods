@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrder, getOrders, getTodayOrders, updateOrderStatus } from '../application/application.order.js';
+import { createOrder, getOrders, getTodayOrders, updateOrderStatus, listOrdersByUser } from '../application/application.order.js';
 
 const router = express.Router();
 
@@ -8,5 +8,6 @@ router.get('/', getOrders);
 router.get('/today', getTodayOrders);
 router.patch('/:orderId/status', updateOrderStatus);
 
+router.get('/user/:userId', listOrdersByUser);
 
 export default router;
