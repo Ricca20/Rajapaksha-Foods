@@ -11,11 +11,12 @@ import {
   Plus, 
   ArrowRight, 
   Shield, 
-  Loader,
   Clock,
   Star,
   Heart
 } from "lucide-react";
+import Lottie from 'lottie-react';
+import spinnerAnimation from '../assets/animate.json';
 import Navbar from "../components/Navbar";
 
 const MenuPage = () => {
@@ -58,14 +59,12 @@ const MenuPage = () => {
       <Navbar />
       <div className="flex items-center justify-center min-h-screen pt-20">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 bg-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center"
-          >
-            <Loader className="w-8 h-8 text-white" />
-          </motion.div>
-          <p className="text-gray-600">Loading today's menu...</p>
+          
+            <div className="w-70 h-50">
+              <Lottie animationData={spinnerAnimation} loop={true} />
+            </div>
+          
+          <p className="animate-pulse text-gray-900 mt-1 text-xl">Loading <spin className="text-orange-500">today's menu...</spin></p>
         </motion.div>
       </div>
     </div>
