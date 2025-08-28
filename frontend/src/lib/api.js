@@ -20,11 +20,11 @@ export const api = createApi({
             invalidatesTags: ['Menu'],
         }),
         getUserByClerkId: builder.query({
-            query: (clerkId) => `/api/user/${clerkId}`,
+            query: (clerkId) => `/api/user/${clerkId.replace('user_', '')}`,
         }),
         updateUserAddress: builder.mutation({
             query: ({ clerkId, address }) => ({
-                url: `/api/user/${clerkId}/address`,
+                url: `/api/user/${clerkId.replace('user_', '')}/address`,
                 method: 'PUT',
                 body: address,
             }),
