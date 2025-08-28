@@ -339,8 +339,8 @@ const CheckoutPage = () => {
                 if (res?.data?.success) {
                   setSuccess(true);
                   localStorage.removeItem('orderDetails');
-                  // Optionally, redirect after a delay:
-                  // setTimeout(() => navigate('/'), 2000);
+                  // Redirect to orders page after success
+                  setTimeout(() => navigate('/orders'), 2000);
                 }
               }}
             >
