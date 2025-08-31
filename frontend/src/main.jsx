@@ -13,7 +13,9 @@ import AdminPage from './pages/AdminPage.jsx';
 import OrdersToday from './pages/OrdersToday.jsx';
 import MealTimeOrders from './pages/MealTimeOrders.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
+import ContactUsPage from './pages/ContactUs.jsx';
 import OrdersPage from './pages/OrdersPage.jsx';
+import AboutUsPage from './pages/AboutUs.jsx';
 
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -29,7 +31,9 @@ createRoot(document.getElementById('root')).render(
           <Routes>
             <Route path="/" element={<Home/>}/>
             <Route path="/menu" element={<MenuPage/>}/>
+            <Route path="/contact" element={<ContactUsPage/>}/>
             <Route path="/checkout" element={<CheckoutPage/>}/>
+            <Route path="/about" element={<AboutUsPage/>}/>
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>

@@ -7,6 +7,7 @@ import connectDB from './infastructure/db.js';
 import menuRoutes from './api/api.menu.js';
 import UserRouter from "./api/api.user.js";
 import orderRoutes from './api/api.order.js';
+import contactRoutes from './api/api.contact.js';
 
 const frontendURL = process.env.VITE_FRONTEND_URL || '*';
 const backendURL = process.env.VITE_BACKEND_URL;
@@ -36,6 +37,7 @@ app.use(express.json());
 app.use("/api/menu", clerk, menuRoutes);
 app.use("/api/user", clerk, UserRouter);
 app.use("/api/orders", clerk, orderRoutes);
+app.use("/api/contact", contactRoutes);
 
 connectDB();
 app.get('/', async (req, res) => {
