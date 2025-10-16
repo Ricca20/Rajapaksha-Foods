@@ -29,6 +29,39 @@ export const getOrders = async (req, res) => {
   }
 }
 
+export const getFilteredOrders = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    let filter = {};
+    
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      
+      if (startDate) {
+        filter.createdAt.$gte = new Date(startDate);
+      }
+      
+      if (endDate) {
+        // Add 23:59:59 to end date to include the entire day
+        const endDateTime = new Date(endDate);
+        endDateTime.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = endDateTime;
+      }
+    }
+    
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    return res.json(orders);
+  } catch (error) {
+    console.error('Error fetching filtered orders:', error);
+    return res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'An error occurred while fetching filtered orders',
+      redirect: '/'
+    });
+  }
+}
+
 export const getTodayOrders = async (req, res) => {
   try {
     const today = new Date();

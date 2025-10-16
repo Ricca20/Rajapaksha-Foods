@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Package, ClipboardList, Users } from 'lucide-react';
+import { ShoppingBag, Package, ClipboardList, Star, Users } from 'lucide-react';
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const AdminPage = () => {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
         
         {/* Dashboard Tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {/* Today's Orders Tile */}
           <motion.button
             onClick={() => navigate('/admin/orders/today')}
@@ -72,9 +72,9 @@ const AdminPage = () => {
             <p className="text-sm text-gray-600">Items in Stock</p>
           </motion.button>
 
-          {/* Employees Tile */}
+          {/* Reviews Tile */}
           <motion.button
-            onClick={() => navigate('/admin/employees')}
+            onClick={() => navigate('/admin/reviews')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
@@ -83,13 +83,33 @@ const AdminPage = () => {
             className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all w-full text-left"
           >
             <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Star className="w-6 h-6 text-yellow-500" />
+              </div>
+              <span className="text-sm font-medium text-gray-400">Feedback</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">4.5</h3>
+            <p className="text-sm text-gray-600">Customer Reviews</p>
+          </motion.button>
+
+          {/* Employees Tile */}
+          <motion.button
+            onClick={() => navigate('/admin/employees')}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all w-full text-left"
+          >
+            <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                 <Users className="w-6 h-6 text-purple-500" />
               </div>
-              <span className="text-sm font-medium text-gray-400">Team</span>
+              <span className="text-sm font-medium text-gray-400">Staff</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-1">8</h3>
-            <p className="text-sm text-gray-600">Team Members</p>
+            <p className="text-sm text-gray-600">Employees</p>
           </motion.button>
         </div>
     </>

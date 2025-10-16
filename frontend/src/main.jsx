@@ -12,6 +12,10 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import OrdersToday from './pages/OrdersToday.jsx';
 import MealTimeOrders from './pages/MealTimeOrders.jsx';
+import AllOrders from './pages/AllOrders.jsx';
+import InventoryPage from './pages/InventoryPage.jsx';
+import AdminReviewsPage from './pages/AdminReviewsPage.jsx';
+import EmployeesPage from './pages/EmployeesPage.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import OrdersPage from './pages/OrdersPage.jsx';
 
@@ -34,11 +38,12 @@ createRoot(document.getElementById('root')).render(
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminPage/>}/>
+              <Route path="orders" element={<AllOrders/>}/>
               <Route path="orders/today" element={<OrdersToday/>}/>
               <Route path="orders/:mealType" element={<MealTimeOrders/>}/>
-              {/* Add these routes when you create the components */}
-              {/* <Route path="inventory" element={<Inventory/>}/> */}
-              {/* <Route path="employees" element={<Employees/>}/> */}
+              <Route path="inventory" element={<InventoryPage/>}/>
+              <Route path="reviews" element={<AdminReviewsPage/>}/>
+              <Route path="employees" element={<EmployeesPage/>}/>
             </Route>
             <Route path="/orders" element={<OrdersPage/>}/>
           </Routes>

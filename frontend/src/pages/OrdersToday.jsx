@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Coffee, Sun, Moon, Clock, ArrowRight } from 'lucide-react';
+import { Coffee, Sun, Moon, Clock, ArrowRight, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
   useGetTodayOrdersQuery, 
@@ -7,6 +7,7 @@ import {
   useSetOrderWindowMutation,
   useGetMenuQuery
 } from '../lib/api';
+import MenuEditDialog from '../components/MenuEditDialog';
 
 const OrdersToday = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const OrdersToday = () => {
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
   const [setOrderWindow] = useSetOrderWindowMutation();
   const [isOpenDialogVisible, setIsOpenDialogVisible] = useState(false);
+  const [isMenuEditDialogVisible, setIsMenuEditDialogVisible] = useState(false);
 
   const isLoading = ordersLoading || menuLoading;
 
@@ -122,6 +124,13 @@ const OrdersToday = () => {
             Current Time: {new Date().toLocaleTimeString()}
           </div>
           <button
+            onClick={() => setIsMenuEditDialogVisible(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+          >
+            <Edit className="w-4 h-4" />
+            Edit Menu
+          </button>
+          <button
             onClick={() => setIsOpenDialogVisible(true)}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
           >
@@ -137,6 +146,18 @@ const OrdersToday = () => {
           </div>
         </div>
       </div>
+
+      {/* Menu Edit Dialog */}
+      <MenuEditDialog
+        isVisible={isMenuEditDialogVisible}
+        onClose={() => setIsMenuEditDialogVisible(false)}
+        menu={menu}
+        onMenuUpdated={() => {
+          // After menu is updated, show the order window dialog
+          setIsMenuEditDialogVisible(false);
+          setIsOpenDialogVisible(true);
+        }}
+      />
 
       {/* Order Window Dialog */}
       {isOpenDialogVisible && (
@@ -270,15 +291,29 @@ const OrdersToday = () => {
                     </span>
                   </div>
                   <button
-                    onClick={() => {
-                      // Update all orders in this time period to on_the_way
-                      orders.forEach(order => {
-                        if (order.orderStatus === 'pending' || order.orderStatus === 'in_progress') {
-                          updateOrderStatus(order._id, 'on_the_way');
-                        }
-                      });
-                      // Navigate to the detailed orders page
-                      navigate(`/admin/orders/${id}`);
+                    onClick={async () => {
+                      try {
+                        // Update all orders in this time period to on_the_way
+                        const ordersToUpdate = orders.filter(order => 
+                          order.orderStatus === 'pending' || order.orderStatus === 'in_progress'
+                        );
+                        
+                        // Update each order status to "on_the_way"
+                        await Promise.all(
+                          ordersToUpdate.map(order => 
+                            updateOrderStatus({ 
+                              orderId: order._id, 
+                              status: 'on_the_way' 
+                            }).unwrap()
+                          )
+                        );
+                        
+                        // Navigate to the detailed orders page
+                        navigate(`/admin/orders/${id}`);
+                      } catch (error) {
+                        console.error('Error updating order statuses:', error);
+                        alert('Failed to start delivery. Please try again.');
+                      }
                     }}
                     disabled={!isActive || totalOrders === 0}
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
