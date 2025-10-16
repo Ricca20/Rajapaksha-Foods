@@ -154,6 +154,60 @@ const AllOrders = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const exportRevenueCSV = () => {
+    // Determine the filter period
+    let filterPeriod = '';
+    if (selectedDate) {
+      const date = new Date(selectedDate);
+      filterPeriod = `Date: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+    } else {
+      filterPeriod = `Period: ${monthNames[selectedMonth]} ${selectedYear}`;
+    }
+
+    // Add status filter info if applicable
+    const statusInfo = statusFilter !== 'all' 
+      ? `, Status: ${statusOptions.find(opt => opt.value === statusFilter)?.label}` 
+      : '';
+
+    // Build CSV content with revenue summary
+    const csvContent = [
+      // Header section
+      'Revenue Report',
+      `Filter ${filterPeriod}${statusInfo}`,
+      `Generated: ${new Date().toLocaleString('en-US')}`,
+      '',
+      // Summary section
+      'Summary',
+      `Total Orders,${stats.totalOrders}`,
+      `Total Revenue,Rs. ${stats.totalRevenue.toFixed(2)}`,
+      '',
+      // Detailed orders
+      'Order Details',
+      'Order ID,Date,Customer,Items,Total,Status',
+      ...filteredOrders.map(order => [
+        `#${order._id.slice(-8)}`,
+        formatDate(order.createdAt),
+        order.deliveryAddress?.name || 'N/A',
+        `"${order.menuItems?.join('; ') || 'N/A'}"`,
+        `Rs. ${order.total?.toFixed(2) || '0.00'}`,
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // Create filename based on filters
+    const fileName = selectedDate 
+      ? `revenue_${new Date(selectedDate).toISOString().split('T')[0]}.csv`
+      : `revenue_${monthNames[selectedMonth]}_${selectedYear}.csv`;
+    
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -163,28 +217,24 @@ const AllOrders = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div >
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/admin')}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">All Orders</h1>
-            <p className="text-sm text-gray-600">
-              Showing {filteredOrders.length} orders for {monthNames[selectedMonth]} {selectedYear}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">All Orders</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Showing {filteredOrders.length} orders for {monthNames[selectedMonth]} {selectedYear}
+          </p>
         </div>
         
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium ${
+              showFilters 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
           >
             <Filter className="w-4 h-4" />
             Filters
@@ -193,7 +243,7 @@ const AllOrders = () => {
           
           <button
             onClick={exportToCSV}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 font-medium"
           >
             <Download className="w-4 h-4" />
             Export CSV
@@ -203,46 +253,50 @@ const AllOrders = () => {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalOrders}</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
+              <p className="text-3xl font-bold text-gray-900">{stats.totalOrders}</p>
             </div>
-            <Package className="w-8 h-8 text-blue-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">Rs. {stats.totalRevenue.toFixed(2)}</p>
-            </div>
-            <DollarSign className="w-8 h-8 text-green-500" />
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-green-600">{stats.statusCounts.completed || 0}</p>
-            </div>
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Package className="w-6 h-6 text-blue-600" />
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.statusCounts.pending || 0}</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
+              <p className="text-3xl font-bold text-gray-900">Rs. {stats.totalRevenue.toFixed(2)}</p>
             </div>
-            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Completed</p>
+              <p className="text-3xl font-bold text-green-600">{stats.statusCounts.completed || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <Clock className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Pending</p>
+              <p className="text-3xl font-bold text-yellow-600">{stats.statusCounts.pending || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-yellow-600" />
             </div>
           </div>
         </div>
@@ -250,7 +304,7 @@ const AllOrders = () => {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Year Filter */}
             <div>
@@ -258,7 +312,7 @@ const AllOrders = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {availableYears.map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -272,7 +326,7 @@ const AllOrders = () => {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {monthNames.map((month, index) => (
                   <option key={index} value={index}>{month}</option>
@@ -287,7 +341,7 @@ const AllOrders = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -297,7 +351,7 @@ const AllOrders = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {statusOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -315,21 +369,29 @@ const AllOrders = () => {
                   placeholder="Customer, address, ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Clear Filters */}
-          <div className="mt-4 flex justify-end">
+          <div className="mt-6 flex justify-between items-center">
+            <button
+              onClick={exportRevenueCSV}
+              className="px-6 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Export Revenue CSV
+            </button>
+            
             <button
               onClick={() => {
                 setSelectedDate('');
                 setStatusFilter('all');
                 setSearchTerm('');
               }}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
             >
               Clear Filters
             </button>
@@ -338,47 +400,49 @@ const AllOrders = () => {
       )}
 
       {/* Orders List */}
-      <div className="bg-white rounded-2xl shadow-sm border">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         {filteredOrders.length === 0 ? (
           <div className="p-12 text-center">
-            <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders found</h3>
             <p className="text-gray-500">Try adjusting your filters to see more results.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-2xl">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Order Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Items
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Total
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-2xl">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap rounded-2xl">
+                  <tr key={order._id} className="bg-white hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <div className="text-sm font-medium text-gray-900">
-                          #{order._id.slice(-8)}
+                        <div className="text-sm font-semibold text-gray-900">
+                          #{order._id.slice(-8).toUpperCase()}
                         </div>
-                        <div className="text-sm text-gray-500 flex items-center">
+                        <div className="text-xs text-gray-500 flex items-center mt-1">
                           <Clock className="w-3 h-3 mr-1" />
                           {formatDate(order.createdAt)}
                         </div>
@@ -388,10 +452,10 @@ const AllOrders = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
                         <div className="text-sm font-medium text-gray-900 flex items-center">
-                          <User className="w-3 h-3 mr-1" />
+                          <User className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
                           {order.deliveryAddress?.name || 'N/A'}
                         </div>
-                        <div className="text-sm text-gray-500 flex items-center">
+                        <div className="text-xs text-gray-500 flex items-center mt-1">
                           <MapPin className="w-3 h-3 mr-1" />
                           {order.deliveryAddress?.city || 'N/A'}
                         </div>
@@ -399,16 +463,16 @@ const AllOrders = () => {
                     </td>
                     
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-gray-900 font-medium">
                         {order.menuItems?.join(', ') || 'N/A'}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 mt-1">
                         {order.selectedPortion} • {order.selectedAddOn || 'No add-ons'}
                       </div>
                     </td>
                     
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-bold text-gray-900">
                         Rs. {order.total?.toFixed(2) || '0.00'}
                       </div>
                     </td>
@@ -417,7 +481,13 @@ const AllOrders = () => {
                       <select
                         value={order.orderStatus}
                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                        className={`text-sm rounded-full px-3 py-1 border-0 font-medium bg-${getStatusColor(order.orderStatus)}-100 text-${getStatusColor(order.orderStatus)}-800 focus:ring-2 focus:ring-${getStatusColor(order.orderStatus)}-500`}
+                        className={`text-xs rounded-full px-3 py-1.5 border-0 font-semibold cursor-pointer transition-colors
+                          ${order.orderStatus === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : ''}
+                          ${order.orderStatus === 'in_progress' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : ''}
+                          ${order.orderStatus === 'on_the_way' ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' : ''}
+                          ${order.orderStatus === 'completed' ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''}
+                          ${order.orderStatus === 'cancelled' ? 'bg-red-100 text-red-800 hover:bg-red-200' : ''}
+                        `}
                       >
                         {statusOptions.slice(1).map(option => (
                           <option key={option.value} value={option.value}>
@@ -427,13 +497,13 @@ const AllOrders = () => {
                       </select>
                     </td>
                     
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium rounded-2xl">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => {
                           setSelectedOrder(order);
                           setIsOrderDetailVisible(true);
                         }}
-                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                        className="text-blue-600 hover:text-blue-800 flex items-center gap-1.5 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors font-medium"
                       >
                         <Eye className="w-4 h-4" />
                         View
@@ -460,7 +530,7 @@ const AllOrders = () => {
           // Keep modal open to show updated status
         }}
       />
-    </div>
+      </div>
   );
 };
 
